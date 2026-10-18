@@ -8,3 +8,10 @@
 - 公開範囲: 日本語文書と権利確認済みの本リポジトリ独自文章。生データ/firmware/スクリプト転載なし。
 - 検証: 出典、日付、役割、秘密情報、主張強度の監査を実施。監査の詳細は公開push後に追記。
 - Rollback: Git commitで復元可能。実機変更なし。
+
+## 公開後監査（2026-10-19）
+
+- `Karin-Laboratory/sbat6-easymesh` を新規Publicで作成し、`main`へpush。
+- GitHub APIで公開範囲・README取得・default branchを確認。remote mainは `46713e9ed807aeceded14e7c7a49d45ac9720c63` 時点で一致。
+- 31 tracked filesを再監査。秘密鍵/token/PSK形式/MAC/IMEIのpattern scanは0件、binary/non-text 0件、Markdown内部リンク切れ0件。
+- `git diff --check` 成功。実機には接続・変更していない。
