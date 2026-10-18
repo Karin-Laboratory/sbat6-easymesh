@@ -28,7 +28,20 @@ SoftBank Air Terminal 6（SBAT6 / SBAT6A相当）2台で、EasyMesh Controller/A
 
 この実験は純正ファームウェア内部のMediaTek/メーカー独自コンポーネントを利用しています。本リポジトリは非公式な実験記録であり、メーカー製バイナリ、rootfs、設定バックアップ、実機の生ログ、秘密情報は含みません。
 
+## 目的別に読む
+
+- **root取得済みで、まずEasyMeshを試したい** → [6 GHzクイックスタート](docs/24-easymesh-quickstart.md)
+- **KnOSによってSSHが切れる** → [SSH/firewall永続化](docs/18-ssh-firewall-persistence.md)
+- **ControllerとAgentの設定を知りたい** → [設定比較表](configs/easymesh-values-matrix.md)
+- **Ethernetではつながるのに無線にならない** → [6 GHz BH手順](docs/08-wireless-backhaul.md)
+- **5 GHz＋6 GHz MLOまで試したい** → [MLO詳細ガイド](docs/10-mlo.md)
+- **問題が起きた** → [症状別トラブルシューティング](docs/25-easymesh-troubleshooting.md)
+- 工程別に再現可能範囲を確認 → [再現性coverage](docs/26-reproduction-coverage.md)
+
+クイックスタートは観測と実験記録に基づく段階ガイドである。Controller roleのwriter、無線profileの全投入手順、完全な成功snapshotは保存記録から復元できていないため、実行前提を満たせない工程を推測で補わない。
+
 ## 章構成
+
 
 - [全体像と確認範囲](docs/01-overview.md) · [ハードウェア](docs/02-hardware.md) · [管理経路](docs/03-root-access.md)
 - [EasyMesh構成](docs/04-easymesh-architecture.md) · [Controller](docs/05-controller-setup.md) · [Agent](docs/06-agent-setup.md)
@@ -38,6 +51,7 @@ SoftBank Air Terminal 6（SBAT6 / SBAT6A相当）2台で、EasyMesh Controller/A
 - **掲示板向け中心章:** [root取得後からEasyMesh親子化まで](docs/21-from-root-to-easymesh.md) · [5ch投稿866〜868への回答](docs/22-5ch-866-868-answer.md)
 - [KnOS設定復元](docs/17-knos-configuration-reset.md) · [SSH/firewall永続化](docs/18-ssh-firewall-persistence.md) · [root password](docs/19-root-password-and-authentication.md) · [SSH切断診断](docs/20-ssh-loss-troubleshooting.md)
 - [EasyMesh設定値の比較表](configs/easymesh-values-matrix.md) · [安全な読み取り専用診断スクリプト](scripts/sbat6-diagnose.sh)
+- [6 GHzクイックスタート](docs/24-easymesh-quickstart.md) · [トラブルシューティング](docs/25-easymesh-troubleshooting.md) · [再現性coverage](docs/26-reproduction-coverage.md)
 - [時系列](docs/timeline.md) · [技術的知見](docs/technical-findings.md) · [未解決事項](docs/unresolved-issues.md) · [公開前監査](docs/23-publication-audit.md)
 - [公開証跡索引](evidence/INDEX.md) · [出典対応表](SOURCES.md) · [変更履歴](HISTORY.md)
 

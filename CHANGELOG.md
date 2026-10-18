@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-19 再現マニュアル全面補強
+
+- 6 GHz EasyMeshクイックスタートと段階判定付き詳細再現ガイドを追加。保存資料から復元できないController writer/profile列は未復元と明記。
+- Controller/Agent、有線onboarding、6 GHz BH、L2検証、MLOの手順・期待状態・証拠限界を補強。
+- 19症状のトラブルシューティングと工程別A/B/C再現coverageを追加。
+- 診断scriptに数値role、distance、BH medium/status/type、APCLI counters、SSH listener port観測と記事由来fixture self-testを追加。
+- 公開記事転記fixtureはraw実機logではないことを明記。文書/出典/READMEを更新。
+- unittest 6件、shell syntax、diagnostic self-test、Markdown link/artifact/read-only契約、git diff checkを確認。機器アクセス/変更なし。
+
 ## 2026-10-19 再現性・診断補強
 
 - `docs/18`と`docs/19`を復旧記録・KnOSのpasswd/shadow参照経路まで拡充し、一般OpenWrtの説明、SBAT6静的解析、過去実機確認を区別。

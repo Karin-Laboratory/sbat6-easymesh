@@ -1,5 +1,12 @@
 # 変更履歴
 
+## 2026-10-19 再現マニュアル全面補強
+
+- 6 GHzクイックスタート、詳細再現ガイド、19症状のトラブルシューティング、工程別A/B/C coverageを追加。
+- mapd/1905設定の入力・runtime生成経路とMLO初回RSNE失敗の原因訂正を追記。
+- role/distance/BH形式を解析する診断scriptと公開記事由来の正規化fixtureを追加。raw実機CLI logではない証拠限界を明記。
+- unittest、script構文/自己テスト、リンク・秘密・artifact監査を実施。実機変更なし。
+
 ## 2026-10-19 再現性・診断補強
 
 - SSH/firewall永続化をDropbear+procd、UCI、overlay seed/cron、KnOS再構成の4方式で再整理し、変更前から失敗時復旧までの確認順を追加。

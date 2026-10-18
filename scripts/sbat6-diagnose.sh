@@ -9,6 +9,59 @@ section() { printf '\n== %s ==\n' "$1"; }
 value() { printf '%s: %s\n' "$1" "${2:-unavailable}"; }
 have() { command -v "$1" >/dev/null 2>&1; }
 
+parse_role() {
+    printf '%s\n' "$1" | awk '
+        { s=tolower($0)
+          if (s ~ /controller/) { print "Controller"; exit }
+          if (s ~ /agent/) { print "Agent"; exit }
+          if (s ~ /device role|dev_role/) {
+              for (i=1; i<=NF; i++) if ($i ~ /^[0-9][0-9]?$/) {
+                  n=$i+0
+                  if (n==1) { print "Controller"; exit }
+                  if (n==2) { print "Agent"; exit }
+              }
+          }
+          if (NF==1 && $1 ~ /^[0-9][0-9]?$/) {
+              n=$1+0
+              if (n==1) { print "Controller"; exit }
+              if (n==2) { print "Agent"; exit }
+          }
+        }
+        END { if (NR==0) print "unknown" }
+    ' | sed -n '1p'
+}
+
+parse_distances() {
+    printf '%s\n' "$1" | awk '{s=tolower($0); if (s ~ /distance/) {sub(/^.*distance/,"",s); if (match(s,/[0-9]+/)) print substr(s,RSTART,RLENGTH)}}' | tr '\n' ' '
+}
+
+parse_medium() {
+    lower=$(printf '%s\n' "$1" | tr '[:upper:]' '[:lower:]')
+    case "$lower" in *6g*|*6\ ghz*) printf '6G\n';; *5g*|*5\ ghz*) printf '5G\n';; *2.4g*|*2.4\ ghz*) printf '2.4G\n';; *) printf 'unknown\n';; esac
+}
+
+parse_number() { printf '%s\n' "$1" | tr -cd '0123456789\n' | sed -n '1p'; }
+
+fixture_section() {
+    awk -v section="$2" '$0=="[" section "]" {on=1; next} /^\[[^]]+\]$/ {on=0} on {print}' "$1"
+}
+
+# Parser self-check uses only a sanitized, report-transcribed fixture. It never
+# inspects or invokes a router and can be run from this repository's tests.
+if [ "${1:-}" = "--self-test" ]; then
+    fixture=${2:-}
+    [ -r "$fixture" ] || { printf 'fixture unavailable\n'; exit 2; }
+    role=$(parse_role "$(fixture_section "$fixture" getrole-agent)")
+    controller_role=$(parse_role "$(fixture_section "$fixture" getrole-controller)")
+    distances=$(parse_distances "$(fixture_section "$fixture" dump_topology)")
+    medium=$(parse_medium "$(fixture_section "$fixture" dump_topology)")
+    status=$(parse_number "$(fixture_section "$fixture" bh_conn_status)")
+    bh_type=$(parse_number "$(fixture_section "$fixture" bh_conn_type)")
+    printf 'agent_role=%s controller_role=%s distances=%s medium=%s bh_status=%s bh_type=%s\n' "$role" "$controller_role" "$distances" "$medium" "${status:-unknown}" "${bh_type:-unknown}"
+    [ "$role" = Agent ] && [ "$controller_role" = Controller ] && [ "$distances" = "1 " ] && [ "$medium" = 6G ] && [ "$status" = 1 ] && [ "$bh_type" = 4 ]
+    exit $?
+fi
+
 # Replace IPv4 and MAC-like strings before displaying command output.
 sanitize() {
     sed -e 's/\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)/<IP>/g' \
@@ -42,8 +95,12 @@ section 'SSH and procd'
 if have ps; then
     ps w 2>/dev/null | awk 'NR>1 {s=tolower($0); if (s ~ /dropbear/) d++; if (s ~ /sshd/) o++; if (s ~ /procd/) p++} END {printf "dropbear-processes: %d\nopenssh-processes: %d\nprocd-processes: %d\n", d, o, p}'
 fi
-if have ss; then value ssh-port-22-listeners "$(ss -lnt 2>/dev/null | awk 'NR>1 && $4 ~ /:22$/ {n++} END {print n+0}')"
-elif have netstat; then value ssh-port-22-listeners "$(netstat -lnt 2>/dev/null | awk 'NR>2 && $4 ~ /:22$/ {n++} END {print n+0}')"
+if have ss; then
+    ports=$(ss -lntp 2>/dev/null | awk 'NR>1 && tolower($0) ~ /dropbear|sshd/ {local=$4; sub(/^.*:/,"",local); gsub(/[^0-9]/,"",local); if (local!="") print local}' | sort -u | tr '\n' ' ')
+    if [ -n "$ports" ]; then value ssh-listener-ports "$ports"; else value ssh-listener-ports unknown; fi
+elif have netstat; then
+    ports=$(netstat -lntp 2>/dev/null | awk 'tolower($0) ~ /dropbear|sshd/ {local=$4; sub(/^.*:/,"",local); gsub(/[^0-9]/,"",local); if (local!="") print local}' | sort -u | tr '\n' ' ')
+    if [ -n "$ports" ]; then value ssh-listener-ports "$ports"; else value ssh-listener-ports unknown; fi
 else value ssh-listener unavailable; fi
 if [ -x /etc/init.d/dropbear ]; then /etc/init.d/dropbear status 2>&1 | sanitize
 else value dropbear-init unavailable; fi
@@ -85,16 +142,22 @@ if have uci; then
     done
 fi
 if have mapd_cli; then
-    for cmd in getrole dump_topology bh_conn_status bh_conn_type; do
+    for cmd in getrole agent_list dump_topology dump_topology_v1 bh_info bh_conn_status bh_conn_type; do
         out=$(mapd_cli /tmp/mapd_ctrl "$cmd" 2>/dev/null)
         case "$cmd" in
-            getrole)
-                case "$out" in *Controller*|*controller*) value mapd-role Controller;; *Agent*|*agent*) value mapd-role Agent;; *) value mapd-role unknown;; esac ;;
-            dump_topology)
-                distances=$(printf '%s\n' "$out" | awk -F '[:,=[:space:]]+' 'tolower($0) ~ /distance/ {for (i=1; i<NF; i++) if (tolower($i) == "distance" && $(i+1) ~ /^[0-9]+$/) print $(i+1)}' | tr '\n' ' ')
-                value topology-distances "${distances:-unavailable}" ;;
+            getrole) value mapd-role "$(parse_role "$out")" ;;
+            agent_list) value agent-list-records "$(printf '%s\n' "$out" | awk 'NF {n++} END {print n+0}')" ;;
+            dump_topology|dump_topology_v1|bh_info)
+                distances=$(parse_distances "$out")
+                [ -n "$distances" ] && value topology-distances "$distances"
+                medium=$(parse_medium "$out")
+                [ "$medium" != unknown ] && value topology-backhaul-medium "$medium"
+                status=$(printf '%s\n' "$out" | awk -F '[ :=]+' 'tolower($0) ~ /backhaul connection status|bh_conn_status/ {for (i=1;i<=NF;i++) if ($i ~ /^[0-9]+$/) {print $i; exit}}')
+                [ -n "$status" ] && value mapd-bh-status "$status"
+                type=$(printf '%s\n' "$out" | awk -F '[ :=]+' 'tolower($0) ~ /backhaul connection type|bh_conn_type/ {for (i=1;i<=NF;i++) if ($i ~ /^[0-9]+$/) {print $i; exit}}')
+                [ -n "$type" ] && value mapd-bh-type "$type" ;;
             bh_conn_status|bh_conn_type)
-                numeric=$(printf '%s\n' "$out" | tr -cd '0123456789\n' | head -n 1)
+                numeric=$(parse_number "$out")
                 value "mapd-$cmd" "${numeric:-unavailable}" ;;
         esac
     done
@@ -105,7 +168,9 @@ for ifn in apcli0 apclii0 apclix0; do
     if [ -d "/sys/class/net/$ifn" ]; then
         oper=$(cat "/sys/class/net/$ifn/operstate" 2>/dev/null)
         carrier=$(cat "/sys/class/net/$ifn/carrier" 2>/dev/null)
-        value "$ifn" "present operstate=${oper:-unknown} carrier=${carrier:-unknown}"
+        rx=$(cat "/sys/class/net/$ifn/statistics/rx_bytes" 2>/dev/null)
+        tx=$(cat "/sys/class/net/$ifn/statistics/tx_bytes" 2>/dev/null)
+        value "$ifn" "present operstate=${oper:-unknown} carrier=${carrier:-unknown} rx_bytes=${rx:-unknown} tx_bytes=${tx:-unknown}"
     else value "$ifn" absent; fi
 done
 printf '\nNote: this report is a point-in-time read-only diagnostic; absence of management connectivity does not by itself prove EasyMesh failure.\n'

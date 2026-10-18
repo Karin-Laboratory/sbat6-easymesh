@@ -1,47 +1,57 @@
-# 10. 5 GHz＋6 GHz MLO
+# 10. 5 GHz＋6 GHz MLO（上級編）
 
-## 証拠の整理
+この章は、6 GHz単独EasyMesh backhaulが成立した後の追加実験を扱う。MLO設定項目やコードが存在することと、複数リンクが同時に成立したことは別である。以下は2026-08-23公開記事と保存済み解析資料で確認できた範囲で、再現用の無条件投入スクリプトではない。
 
-**実機確認済み（当時の公開本人報告）:** 2026-08-23のQiita記事には、SBAT6 2台のEasyMesh構成上で5 GHz/6 GHzの2-link MLOを成立させた記録がある。MLO設定項目が存在するだけの話ではなく、STA MLDの`mld_sta257`で`ref_cnt=2`、link別`band_idx=1`（5 GHz）/`2`（6 GHz）、4-way handshake、両帯域の転送カウンター増加を観測したという報告である。[出典](../SOURCES.md#公開一次報告)
+## 成立を確認した証拠
 
-**保存スクリプトでも照合:** `mlo_apply_a.sh` / `mlo_apply_b.sh`はA/BにAP MLDとSTA MLDを構成し、5 GHz・6 GHzの設定を準備する。`mlo_stability_sampler.sh`は各APCLIのcarrier/bytesとMLD情報を採取する設計。公開記事の設定・観測説明と整合する。スクリプトそのものやキャプチャ原本は秘密値・個体情報を含むため公開していない。
+公開記事は5 GHz/6 GHzの2-link MLOについて、STA側`mld_sta257`の`ref_cnt=2`、`band_idx=1`と`band_idx=2`、4-way handshake完了、両linkの転送counter増加を報告する。再起動試験では通常の`sync; reboot`後にDHCP約170秒、EasyMesh再参加約173秒、MLOが少なくとも342秒維持された。起動直後からの無停止を意味しない。
 
-**生ログの限界:** 2026-08-23付の`mlo-stability-success`等の圧縮キャプチャは保存されているが、本公開資料では生ログを再配布せず、全行を独立して再検証したとは主張しない。従ってMLO成立・再起動復帰・性能値は「公開済み本人の当時の実測報告」、設定差分と観測用スクリプトは「保存スクリプトで確認」と区別する。
+保存済み安定性captureの記録は464秒の安定観測と両band indexを含む。ただしcapture名の日付（2026-02-28）とRUNBOOK見出し（2026-08-23）、記事の日付が一致しない。独立した同一試験と断定せず、日付由来の不整合を保持する。capture中は物理APCLIの一方のcarrier表示がdownでもMLD配下linkが成立している場合があり、APCLI単体carrierだけでMLO状態を判定しない。
 
-## RSNE mismatchから2-link成立まで
+## 初回失敗から修正まで
 
-Qiita記録では、MLO設定適用後に約100 msの切断が繰り返され、`wpa_supplicant`がRSNE mismatchを報告した。原因は、5 GHz側のWPA2系設定と6 GHz側のSAE/PMF必須設定の不一致、およびEasyMesh runtime provisioningが5 GHz側BSS profile設定を書き戻すことだった。
+| 項目 | 初回失敗時 | 修正後に確認した状態 | 根拠/強さ |
+|---|---|---|---|
+| 5 GHz BH BSS | WPA2/PSK、AKM `00-0f-ac-02`、PMF optional、RSNE capability `8c00` | WPA2/SAE profileへ変更、実行時`wpa=2`, `key_mgmt=SAE`, `ieee80211w=2`, CCMP | capture解析と記事。SSID/鍵は非公開 |
+| 6 GHz BH BSS | SAE、PMF required、AKM `00-0f-ac-08`、capability `cc00` | 5 GHzとSAE/PMF条件を一致 | capture解析 |
+| 切断 | M3受信後、supplicantがRSNE差異を検出しreason 1 deauth。約109 msで2-linkが解体 | 4-way handshake 4/4、key negotiation、`CTRL-EVENT-CONNECTED` | syscall/RSNE traceと記事 |
+| 最初の原因仮説 | `mapd`/`wapp`の`DISABLE_NETWORK`を疑った | 後続syscall時系列では直前のdisable命令を確認できず、仮説を撤回。M3 RSNE mismatchが直接原因 | 保存traceによる訂正 |
+| 設定の戻り | UCIの`rai2`暗号設定を変更してもruntime provisioningが再生成 | EasyMesh側BSS元profileも変更。`mapd.6.authmode`を`0x0022`から`0x0040`へ、`/etc/map/wts_bss_info_config`のid 6も整合 | 保存rootfs/RUNBOOK。汎用値としては未検証 |
+| 維持 | UCI値のみでは再起動/daemon起動後に戻る | source profileと実際のhostapd/DAT/on-air条件を揃えた後に成立 | 保存記録 |
 
-修正ではBSS profileの生成元を調整し、両リンクの認証条件をSAE/PMF requiredに揃えた。その後、4-way handshake成功、MLD参照数2、5/6 GHzの両band indexを確認したと記事は記録する。個々のSSID、鍵、BSSIDを含む生設定は公開しない。
+ログ中には修正後もscan結果に見つからないlinkやRSNE比較に関する非致命的メッセージが残ることがある。成功判定は特定警告文字列の消失ではなく、M3 deauthが止まり、handshake完了、MLD 2 linkとデータ転送が同時に確認できること。
 
-## 再起動後の復帰
+## 設定経路と再現上の注意
 
-公開記事では、`sync`後に通常の`reboot`を行い、2-link MLOが自動復帰し、DHCPは約170秒後、EasyMesh再参加は約173秒後、MLOは少なくとも342秒継続して観測された。これは「再起動後も最終的に復帰した」という成功報告であり、起動直後から無停止で通信できたことを意味しない。
+MLO用のAP側MLDは`rai2`（5 GHz）と`rax2`（6 GHz）、STA側は`apclii0`と`apclix0`を束ねる構成が保存スクリプトの静的解析で確認できる。保存案にはAP group 2、STA group 1、EHT160、`mapd.8.mld_groupID=2`がある。これらはそのまま投入できる完全な手順ではなく、端末・firmware固有の保存値である。`mlo_apply_a.sh`/`mlo_apply_b.sh`の実行成功は確認できていないため、公開用の実行レシピとして転載しない。
 
-別のローカルB再起動snapshot（ファイル名に`20260721`、ホストmtime 2026-08-23、端末epochとも不一致）では`192.168.3.247`、role 2、MapMode 1と関連設定hashが前後一致する一方、採取時にUPだったSTA interfaceが`apclix0`から`apclii0`へ変化していた。これをMLO成功報告の否定や同一試験の失敗とは扱わない。時刻・試験コンテキストが確定せず、リンク選択の別観測として残す。
+EasyMeshは起動時にBSS profileを生成/適用する。無線UCI値だけを直してもdaemon後に戻ることがあり、実際に動作中のhostapd/DAT設定とBeacon/Probe ResponseのRSNEを確認する必要がある。SAE/PMF変更は管理や無線接続を失わせ得るため、独立した有線/console復旧路と設定退避がない状態では実行しない。記録にないSSID、PSK、BSSIDやprofile生成コマンドは補わない。
 
-## 確認出力の読み方
+## read-only確認
 
-確認に使ったread-onlyコマンドと観測点:
+次は観測例であり、機器の全バージョンに同じdebugfs pathがある保証はない。
 
 ```sh
 cat /sys/kernel/debug/mtk_hwifi/wsys/mld_sta/mld_sta257
-# 5 GHz側: /sys/class/net/apclii0/statistics/{rx_bytes,tx_bytes}
-# 6 GHz側: /sys/class/net/apclix0/statistics/{rx_bytes,tx_bytes}
+cat /sys/class/net/apclii0/statistics/rx_bytes
+cat /sys/class/net/apclii0/statistics/tx_bytes
+cat /sys/class/net/apclix0/statistics/rx_bytes
+cat /sys/class/net/apclix0/statistics/tx_bytes
 ```
 
-記事が報告する主要な観測値:
+| 観測 | 成功を示す条件 | この証拠だけでは言えないこと |
+|---|---|---|
+| MLD debugfs | `ref_cnt=2`、link `band_idx=1`と`2` | その瞬間にアプリ通信が正常とは限らない |
+| 5/6 GHz counters | 同一の転送中に両方のbyte数が増える | 個別linkの実効速度や公平な負荷配分 |
+| 4-way handshake | 4/4とconnectedイベント | 長時間安定性 |
+| 端末間転送 | Ethernet PC間で通信できる | VLAN/multicast/MTU全条件の透過保証 |
 
-```text
-mld_sta257: ref_cnt = 2
-link: band_idx = 1 (5 GHz)
-link: band_idx = 2 (6 GHz)
-apclii0 (5 GHz): byte counter increases during transfer
-apclix0 (6 GHz): byte counter increases during transfer
-```
+初回失敗を調べる場合は、supplicant/driver logでM3時点のRSNE、deauth reason、2-link teardown時刻を比較する。UCI表示だけでruntime状態を断定しない。
 
-この要約は本人の公開報告を短く整理したもので、完全な機器出力の転載ではない。MLOの強い確認は設定名ではなく、peer/MLD状態、2 linkの同時association、両linkの転送counter、端末間のデータ転送を組み合わせること。
+## 性能、160+160、EHT320
 
-## 160+160とEHT320
+公開記事のルーター端点MLO測定は概ねA→B 334/315 Mbps、逆方向359/340 Mbps（sender/receiver）。Ethernet PC間iperf3では1 stream約936/909 Mbps、10 stream約941/908 Mbpsであり、1GbE端点上限に近い別の測定である。これらを無線理論速度と解釈しない。
 
-2026-08-24のEHT320試験READMEは、160+160を既知の成功ベースラインとして記し、EHT320試験案は未転送・未実行としている。後日の公開Qiitaに5+6 GHz 2-link MLOの成功報告はあるが、それをEHT320実機試験の証拠へ読み替えない。EHT320のオンエア幅・中心周波数・EHT Operation IEを確認できる実測記録は本監査では取得できず、**EHT320成功は未確認**。
+保存されたEHT320 READMEは160+160を過去の成功baselineとして挙げるが、EHT320用scriptは準備物で未実行。EHT320成立、320 MHz実幅、EHT Operation IEは未確認である。
+
+関連: [6 GHz単独backhaul](08-wireless-backhaul.md)、[L2測定](09-l2-bridge.md)、[障害診断](25-easymesh-troubleshooting.md)、[再現範囲](26-reproduction-coverage.md)。

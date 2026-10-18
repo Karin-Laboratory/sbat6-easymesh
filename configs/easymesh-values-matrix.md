@@ -2,6 +2,8 @@
 
 この表は再現可能な記録を作るための照合表です。完全な機器設定ではなく、秘密を含む無線プロファイルも収録しません。値の由来が異なる場合は同じ欄に混ぜていません。
 
+保存rootfsの静的解析で確認した生成経路は、`/etc/mapd.uci`から`/etc/uci2map.lua`を介したUCI変換、`/etc/map/mapd_default.cfg`と`mapd_user.cfg`を使う`prepare_mapd_config()`による`/etc/map/mapd_cfg`生成、`prepare_1905_config()`による`/etc/map/1905d.cfg`のrole/interface/bridge生成である。procd管理の`kn_meshd`（START=99）がOEMの準備処理を経て`wapp`, `p1905_managerd`, `mapd`を起動する。これは選定rootfsの静的解析であり、全firmwareで同一とは未確認。
+
 判定: **実機確認**=公開された当時の実機報告、**保存データ**=保存rootfs/設定スナップショット、**不明**=役割別の成功時値を確定できない。
 
 | 設定/項目 | Controller (T6A A) | Agent (T6B B) | 入力/実行時の区別 | 根拠・再現上の注意 |
@@ -26,6 +28,26 @@
 | Ethernet onboarding | 有線でAgent発見を確認 | Controllerへ有線接続してから無線BHへ | runtime topology | discoveryとwireless BHを切り分ける段階。`onboarding 0`が必須だったとは言えない |
 | 6GHz radio | ch 21 / 6055 MHz / 160 MHz、4addr | 同じBH linkとして観測 | runtime radio | 実機報告に基づく。地域・規制・firmware差に注意 |
 | MLO link | `rai2` + `rax2`, MLD group 2 | `apclii0` + `apclix0`, MLD group 1 | runtime/driver | `mld_sta257 ref_cnt=2`, band_idx 1/2報告。コード/設定存在だけで成立としない |
+
+### 層別の読み方
+
+| 層 | 保存先/生成先 | 確認できた操作 | 注意 |
+|---|---|---|---|
+| OEM UCI入力 | `/etc/mapd.uci`、`/etc/config/mapd` | `uci -q get` / `uci show`はread-only | KnOS側EasyMesh flagのwriterは未復元 |
+| EasyMesh profile入力 | `/etc/map/mapd_default.cfg`, `mapd_user.cfg` | Agent `DeviceRole=2`の`wificonf` writerのみ記事で確認 | Controller role、MapMode、priorityの変更コマンドは未復元 |
+| mapd runtime | `/etc/map/mapd_cfg` | read-only比較 | daemon起動時に再生成されうる。手編集を永続設定としない |
+| 1905 runtime | `/etc/map/1905d.cfg` | 生成後の解析 | role/interface/bridge設定が反映される。直接編集は再生成で失う可能性 |
+| daemon/runtime | `kn_meshd` → `wapp`, `p1905_managerd`, `mapd` | process/CLI/socket観測 | 直接daemon起動を再現手順にしない |
+
+### security profileのMLO差分
+
+| 項目 | 初回失敗 | 修正後 | 証拠 |
+|---|---|---|---|
+| 5 GHz `rai2` BH BSS | WPA2/PSK、AKM `00-0f-ac-02`、PMF optional、capability `8c00` | SAE、PMF required、CCMP | capture解析/RUNBOOK |
+| 6 GHz `rax2` BH BSS | SAE、AKM `00-0f-ac-08`、PMF required、capability `cc00` | 同じSAE/PMF条件 | capture解析 |
+| EasyMesh profile source | 5GHz authmode `0x0022` | `0x0040`; WTS BSS info id=6も合わせた | 保存値。秘密profileは非公開 |
+
+単なるUCIのradio設定変更ではEasyMesh runtime provisioningにより戻ることがあった。公開再現手順は完全なprofile writerを欠くため、これらの値を個別端末へそのまま適用できるコマンドとして扱わない。
 
 ## 成功判定に使った観測
 

@@ -1,0 +1,19 @@
+# Normalized test fixture; NOT a raw console transcript.
+# Values are the public-report forms from Qiita article 70222d4e64319c0989d3.
+# Device/network identifiers and all credential-bearing fields are absent.
+[getrole-agent]
+Device role: 02
+
+[getrole-controller]
+1
+
+[dump_topology]
+Device role: 02
+Distance from controller: 1
+Backhaul Medium Type: 6G
+
+[bh_conn_status]
+backhaul connection status 1
+
+[bh_conn_type]
+backhaul connection Type 4

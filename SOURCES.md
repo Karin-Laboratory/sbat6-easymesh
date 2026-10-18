@@ -53,6 +53,17 @@
 | `scripts/sbat6-diagnose.sh` | 本作業で新規作成したPOSIX shの読み取り専用コード | IP/MAC/SSIDを隠したpoint-in-time診断 | 独自著作。設定変更、認証ファイル内容取得、targetへの書込なし |
 | `tests/test_repo_audit.py`, `.github/workflows/docs-audit.yml` | 本作業で新規作成 | shell syntax、Markdown内部参照、binary artifact、diagnostic read-only contract、CI secret scan | CI/テストは開発環境でのみ実行。実機未接続 |
 
+## 再現マニュアル補強（2026-10-19）
+
+| 公開用資料 | 調査根拠 | 内容/制約 |
+|---|---|---|
+| `docs/24-easymesh-quickstart.md`, `docs/15-reproduction-guide.md` | 公開Qiita（上記）、保存rootfsの`/etc/init.d/kn_meshd`, `/usr/bin/kn_meshd`, `/etc/uci2map.lua`, `/etc/map/`設定群とEasyMesh生成処理 | 成功値と実行可能writerを区別。選定rootfs静的解析で、Controller writerや完全なprofile投入列は未取得 |
+| `docs/25-easymesh-troubleshooting.md`, `docs/26-reproduction-coverage.md` | Qiita、`projects/sbair6-rce/work/mlo-recon/{A,B}`、MLO captureとRUNBOOK、既存公開docs | 19症状をMesh/control/data planeで分離。工程ごとのA/B/C評価。復旧経路や一意原因が不明な項目を明記 |
+| `tests/fixtures/mapd-success-report.txt` | Qiita成功記事のrole/distance/BH観測例 | **保存済み実機raw CLI logではない。** 公開記事記述から識別情報を除いて正規化したparser test fixture。生CLI transcriptはローカルcapture検索で取得できず |
+| `scripts/sbat6-diagnose.sh` parser/self-test enhancements | 上記記事の表記、既存診断script | 数値/文字列role、distance、BH medium/status/typeに対応。匿名fixtureによるparser testであり、実機互換性の実地試験ではない |
+
+作業環境上の`projects/sbair6-rce`は対象資料がGit commitで追跡されないprivate/local work areaであり、2026-10-19時点でファイルpathと保存capture名を照合した。公開可能なcommit SHAはないため、該当箇所はその旨を明示し、ファイル内容を転載していない。MLOの一部capture名（2026-02-28）とRUNBOOK見出し/記事日付（2026-08-23）は一致せず、同一日時の証拠として扱っていない。
+
 2026-10-19にQiitaとGitHub公開資料を`SBAT6 EHT320`等で検索したが、別のSBAT6 EHT320成功公表は見つからなかった。これは検索範囲内の結果で、存在しないことの網羅的証明ではない。
 
 **取得できなかった/独立照合できない資料:** 5ch投稿の元スレッド生ログ、2026-08 MLO全captureの公開可能な生ログ、投稿者の現在端末での実行時trace、root passwordの再起動認証結果、EHT320の後続オンエア測定。公開Qiitaに記載された実績を否定する意味ではなく、証拠形態を分けるため記載する。

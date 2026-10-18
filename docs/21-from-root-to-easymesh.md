@@ -2,6 +2,8 @@
 
 対象は所有するSBAT6で正規にroot権限を取得し、管理経路を持つ人。初期侵入/RCE手順は扱わない。設定変更はSSH・管理IP・無線接続を失う可能性があるため、診断から始め、別の復旧経路がない作業は実施しない。
 
+実作業の入口には[6 GHzクイックスタート](24-easymesh-quickstart.md)を使い、工程別の証拠不足は[再現性coverage](26-reproduction-coverage.md)、症状の切り分けは[トラブルシューティング](25-easymesh-troubleshooting.md)を参照する。この章は仕組みと判断順を説明する要約で、未復元writerを補完するものではない。
+
 ## Step 1: SSH断の層を判定
 
 まず[診断章](20-ssh-loss-troubleshooting.md)のread-only観測を記録する。uptime、管理IP、実daemonとlisten socket、procd状態、runtime firewall、UCI設定hash、直近network/hotplugログを同じ時刻軸で比較する。TCP接続不可をMesh脱落と同一視しない。
