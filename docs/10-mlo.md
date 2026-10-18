@@ -14,7 +14,7 @@ MLO制御コードや `ApcliMloDisable` の設定項目が見つかることはM
 
 ## 160+160とEHT160
 
-MLO設定スクリプトで両側の5 GHz設定を `EHT160` に揃えている。Bの再起動前後snapshotでは、5/6 GHz STA IFのどちらか一方がUPとなり、稼働側が`apclix0`から`apclii0`へ入れ替わった。これはband/link選択または状態変化の観測であり、2 link同時動作の証明ではない。これは「160+160 MHzの実装幅でオンエア成立」を示すのとは異なる。中心周波数、EHT Operation IE、per-link widthの原証拠が不足しているため、160+160成功とは結論できない。
+2026-08-24のEHT320試験案READMEと `rollback-eht160.sh` は、元に戻す対象を「known-success 160+160 persistent sources」と記録している。したがって当時の実験者記録上、160+160構成は既知の成功ベースラインとして扱われていた（**保存データから確認**）。MLO設定スクリプトでは両側5 GHzを `EHT160` とする構成も保存されている。Bの再起動前後snapshotでは、5/6 GHz STA IFのどちらか一方がUPとなり、稼働側が`apclix0`から`apclii0`へ入れ替わった。これはband/link選択または状態変化の観測であり、2 link同時動作の証明ではない。ただし、本公開監査で参照できた資料にはベースライン成功時の無線capture、EHT Operation IE、中心周波数、per-link width出力が残っていない。よって160+160の正確な無線実現条件やlinkごとの持続性は再検証できず、後日の再現でオンエア確認が必要である。
 
 ## EHT320
 

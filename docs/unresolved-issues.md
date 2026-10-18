@@ -9,7 +9,7 @@
 - 6 GHz無線BH時のEthernetクライアント側DHCP/ARP/VLAN/multicast全項目の検証ログ。
 - 後日のT6A独立STA管理構成がEasyMesh構成を置き換えた正確な日付・理由、およびT6B単独STA/別モードへの移行時期。
 - 起動時の自動firmware/config restoreがEasyMesh設定に影響した実機証拠。
-- MLO linkごとのpeer・channel width・EHT operation IE・同時転送の証拠。160+160成立の証明。
+- 160+160はEHT320案のrollback資料で既知成功ベースラインと記述されるが、その成立時のMLO peer・各link width・EHT operation IE・同時転送の一次ログが未取得。条件の再検証が必要。
 - EHT320の実機試験。保存されているスクリプトは未転送/未実行案。
 - 再現可能なiperf3/TCP/UDP、RTT/jitter、複数反復、長時間安定性データ。
 - T6A/T6Bの正確なhardware revision・純正firmware hashを紐付けた実験manifest。

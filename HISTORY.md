@@ -15,3 +15,4 @@
 - GitHub APIで公開範囲・README取得・default branchを確認。remote mainは `46713e9ed807aeceded14e7c7a49d45ac9720c63` 時点で一致。
 - 31 tracked filesを再監査。秘密鍵/token/PSK形式/MAC/IMEIのpattern scanは0件、binary/non-text 0件、Markdown内部リンク切れ0件。
 - `git diff --check` 成功。実機には接続・変更していない。
+- 公開後再監査で、EHT320 rollback資料が160+160を既知成功ベースラインと記している点を反映。実験者記録上の成功と未取得のオンエア詳細を区別。

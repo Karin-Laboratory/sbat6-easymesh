@@ -7,3 +7,4 @@
 - 原ログ/firmware/秘密情報/実機固有スクリプトを含めず、設定値と測定値の必要最小限要約を収録。
 - source/time/role/secret audit実施。実機変更なし。
 - GitHub Public `Karin-Laboratory/sbat6-easymesh` を作成して `main` へpush。APIから公開設定とREADMEを確認。
+- EHT320試験案に記された既知成功の160+160ベースラインを追記し、オンエア証跡の限界を明記。
