@@ -10,6 +10,7 @@
 | [構成とMLO変更の要約](sanitized/mlo-config-summary.md) | 公開 | スクリプトから読み取れるrole/MLD差分。認証情報なし |
 | capture/strace/logread archive | 非公開 | 存在・対象プロセスは `SOURCES.md` に記録。識別子/秘匿設定を含み得る |
 | firmware/rootfs/partition snapshot | 非公開 | メーカー著作物・端末固有情報。再配布しない |
+| B reboot persistence pre/post summary | 非公開原本・公開要約のみ | role/mode・bridge IP・設定hash保持とactive STA IF変化。日付に不整合あり |
 | EHT320 proposal scripts | 非公開 | device paths/rollback targetを含み、実機未実行。要約のみ |
 
 公開コピーは実験原本ではなく、必要最小限の編集要約である。SHA256はPrivate原本に対する追跡用で、公開資料に秘密値のhashを含めない。

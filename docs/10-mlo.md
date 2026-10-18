@@ -14,7 +14,7 @@ MLO制御コードや `ApcliMloDisable` の設定項目が見つかることはM
 
 ## 160+160とEHT160
 
-MLO設定スクリプトで両側の5 GHz設定を `EHT160` に揃えている。これは「160+160 MHzの実装幅でオンエア成立」を示すのとは異なる。中心周波数、EHT Operation IE、per-link widthの原証拠が不足しているため、160+160成功とは結論できない。
+MLO設定スクリプトで両側の5 GHz設定を `EHT160` に揃えている。Bの再起動前後snapshotでは、5/6 GHz STA IFのどちらか一方がUPとなり、稼働側が`apclix0`から`apclii0`へ入れ替わった。これはband/link選択または状態変化の観測であり、2 link同時動作の証明ではない。これは「160+160 MHzの実装幅でオンエア成立」を示すのとは異なる。中心周波数、EHT Operation IE、per-link widthの原証拠が不足しているため、160+160成功とは結論できない。
 
 ## EHT320
 

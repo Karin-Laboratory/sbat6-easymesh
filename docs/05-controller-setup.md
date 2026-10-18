@@ -2,7 +2,7 @@
 
 ## 確認された役割
 
-**実機確認済み:** 実験構成のA号機をController/親機とし、後続のMLO適用スクリプトは `mapd.mapd_cfg.DeviceRole=1` と `MapMode=1` を事前条件にしていた。T6Aが `DeviceRole=1` だったこと、対向Agentが距離1だったことが役割判定の根拠である。
+**実機確認済み:** 実験構成のA号機をController/親機とし、保存設定snapshotで `DeviceRole=1`, `MapMode=1`。vendor scriptの表示定義も `DeviceRole=1` をControllerと対応づける。対向Agentが距離1だったという当時の観測と合わせて役割を判定した。
 
 ## 保存された設定差分の一部
 

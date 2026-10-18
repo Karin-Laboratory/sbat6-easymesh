@@ -7,6 +7,8 @@
 - 2.4/5/6 GHzの選択優先度、fallback/自動再接続の長時間試験。
 - 失敗イベント全体の順番、DHCP競合・bridge再構成・管理IP消失の個々の原因と厳密な復旧所要時間。
 - 6 GHz無線BH時のEthernetクライアント側DHCP/ARP/VLAN/multicast全項目の検証ログ。
+- 後日のT6A独立STA管理構成がEasyMesh構成を置き換えた正確な日付・理由、およびT6B単独STA/別モードへの移行時期。
+- 起動時の自動firmware/config restoreがEasyMesh設定に影響した実機証拠。
 - MLO linkごとのpeer・channel width・EHT operation IE・同時転送の証拠。160+160成立の証明。
 - EHT320の実機試験。保存されているスクリプトは未転送/未実行案。
 - 再現可能なiperf3/TCP/UDP、RTT/jitter、複数反復、長時間安定性データ。

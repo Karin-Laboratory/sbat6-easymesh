@@ -7,11 +7,11 @@
 | `mapd` / `mapd_cli` | Multi-AP/EasyMesh制御daemonとCLI | 実機採取スクリプト・実行履歴に現れる |
 | `p1905_managerd` | IEEE 1905.1管理面daemon | firmware inventoryに存在。各メッセージ全体の生ログは公開しない |
 | `wapp` | MediaTek Wi-Fi制御連携daemon | 実行中プロセス、MLO teardown時のread-only採取に現れる |
-| `DeviceRole` | mapdのController/Agentロール設定 | 既存変更スクリプトが期待値1/2をassertする |
-| `MapMode` | ベンダーのMulti-AP動作モード | 既存スクリプトが両機の値1を前提にする。モードの全意味は静的コード資料に依存 |
+| `DeviceRole` | mapdのController/Agentロール設定 | A/B snapshotは1/2。vendor script診断文字列は0=Auto, 1=Controller, 2=Agentと示す |
+| `MapMode` | ベンダーのMulti-AP動作モード | A/B snapshotと後続scriptは値1。vendor startup scriptが値を読んで生成config/network処理へ渡す |
 | `map_root`, `map_agent` | driver/wapp側のEasyMesh role表現 | ログ/解析語として確認。daemon上の状態との完全な対応表は未公開 |
 
-T6A Controllerの A/T6Aの保存設定 (`mlo-recon/A/etc/map/mapd_cfg`) は `DeviceRole=1`, `MapMode=1`、B/T6B (`mlo-recon/B/etc/map/mapd_cfg`) は `DeviceRole=2`, `MapMode=1`。vendor script自身の診断文字列はDeviceRole 0=Auto, 1=Controller, 2=Agentと明記する。2026-08-23のMLO後続スクリプトも同値をassertする。これらはスナップショット時点の値で、成功時の初期投入コマンド全体ではない。
+A/T6Aの保存設定 (`mlo-recon/A/etc/map/mapd_cfg`) は `DeviceRole=1`, `MapMode=1`、B/T6B (`mlo-recon/B/etc/map/mapd_cfg`) は `DeviceRole=2`, `MapMode=1`。vendor script自身の診断文字列はDeviceRole 0=Auto, 1=Controller, 2=Agentと明記する。2026-08-23のMLO後続スクリプトも同値をassertする。これらはスナップショット時点の値で、成功時の初期投入コマンド全体ではない。
 
 ## 成功判定
 

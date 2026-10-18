@@ -10,6 +10,7 @@
 | `projects/sbair6-rce/work/mlo_apply_b.sh` | host mtime 2026-08-23 | 04, 06, 10 | PSK読み出し部分を除き役割とMLD差分のみ使用。転載なし |
 | `projects/sbair6-rce/work/mlo_stability_sampler.sh` | host mtime 2026-08-23 | 10, 11 | read-only観測設計を要約。device固有パスを含むので転載なし |
 | `projects/sbair6-rce/work/captures/*.tar.gz` (mlo-leave, mlo-rsne, mlo-stability) | host mtime 2026-08-23 | 10, 12, 13, timeline | 生log/straceは個体識別・設定漏えい懸念で非公開。`meta`の収集存在のみ監査 |
+| `projects/sbair6-rce/work/reboot-persistence/t6b-reboot-persistence-20260721-124656-{baseline,post}-B.txt` と `captures/t6b-reboot-persistence-20260721-124656.tar.gz` | ファイル名日付は2026-07-21、ホストmtime 2026-08-23、端末epochとも不一致 | 06, 10, 12, 13, timeline | Bのrole/mode、br-lan、interface状態、hash一致だけを比較。元データ非公開 |
 | `projects/sbair6-rce/work/eht320-test/README.md`, `apply-eht320.sh`, `verify-eht320.sh`, `rollback-eht160.sh`, `eht320-failsafe.init` | host mtime 2026-08-24 | 10, 12, 14, unresolved | READMEの未実行記述を確認。実行しない、公開転記なし |
 | `projects/sbair6-rce/work/l2bench-max-tx.out`, `l2bench-batchfix-{rx,tx}.out` | host mtime 2026-08-25; private work area（Git SHAなし） | 09, 11, timeline | 各ファイルの試行値を区別して要約。完全ログ/環境情報は非公開 |
 | Current user-provided experiment brief | 2026-10-19 | 01, 04, 07–09, timeline | Distance 0/1、6 GHz BH/L2 success、日付枠を指示文由来の観測要約として明記。個別CLI原ログは未取得 |
