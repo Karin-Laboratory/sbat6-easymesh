@@ -1,5 +1,13 @@
 # 変更履歴
 
+## 2026-10-19 v1.0完成監査
+
+- README/Quickstartに読者前提と停止判定を追加。診断scriptをSSH標準入力から実行可能にし、target IPを空変数で扱う。
+- Controller role/MapMode writerとKnOS flag経路を再調査し、静的候補と実験実行証拠を分離。Controllerの実機変更は未検証。
+- 安全なprofile構造仕様を追加し、完全profile templateは非公開。SSH overlay方式は案Bとして一般向け実行手順を出さない方針に決定。
+- MLO capture、host mtime、RUNBOOK、記事、reboot snapshotの日付不整合を新章とtimelineに整理。
+- 診断script/fixture/tests/CIを強化し、30 shell code fenceのPOSIX/BusyBox構文、SSH stdin quote mock、10 testsを確認。実機変更なし。
+
 ## 2026-10-19 再現マニュアル全面補強
 
 - 6 GHzクイックスタート、詳細再現ガイド、19症状のトラブルシューティング、工程別A/B/C coverageを追加。

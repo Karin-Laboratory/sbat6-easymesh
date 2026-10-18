@@ -8,10 +8,10 @@
 
 | 設定/項目 | Controller (T6A A) | Agent (T6B B) | 入力/実行時の区別 | 根拠・再現上の注意 |
 |---|---|---|---|---|
-| `DeviceRole` | `1` 実機確認 | `2` 実機確認 | `mapd_user.cfg`等を入力にOEM生成処理がruntime cfgへ反映 | `wificonf -f /etc/map/mapd_user.cfg set DeviceRole N`は歴史的writerの記録。無条件投入用ではない |
-| `MapMode` | `1` 実機確認 | `1` 実機確認 | user/default cfgからruntime `/etc/map/mapd_cfg`等へ生成 | MapMode変更はbridge/DHCPを再構成し管理IPを失う可能性あり |
-| `knos.network.easymesh` | `1` 実機確認報告 | `1` 実機確認報告 | KnOS UCI | 値確認例は`uci -q get`。設定変更例ではない |
-| `knos.flags.mesh` | `1` 実機確認報告 | `1` 実機確認報告 | KnOS UCI | EasyMesh daemonが存在するだけでは有効化を意味しない |
+| `DeviceRole` | `1` 実機確認 | `2` 実機確認 | `mapd_user.cfg`等を入力にOEM生成処理がruntime cfgへ反映 | Agent `wificonf` writerは記事記載。Controllerは別のcertification scriptに`datconf` writer候補を静的確認したが、実験で実行した証拠なし |
+| `MapMode` | `1` 実機確認 | `1` 実機確認 | KnOS `change_mapd()`が`knos.network.easymesh=1`時にUCIの`mapd_cfg`/`mapd_user`両方を1に設定し`uci commit mapd`するsource pathを静的確認 | 実験時にその処理が実際に走った証拠は未取得。bridge/DHCPを再構成し管理IPを失う可能性あり |
+| `knos.network.easymesh` | `1` 実機確認報告 | `1` 実機確認報告 | KnOS UCI | positive writer未発見。選定rootfsのuci-revertに`0`へ戻す処理あり。readbackだけが実験根拠 |
+| `knos.flags.mesh` | `1` 実機確認報告 | `1` 実機確認報告 | KnOS UCI | default-settingはprevious configから値を引き継ぐ。1へ設定するwriter未発見。readbackだけが実験根拠 |
 | `BhPriority2G` | `3` Controller成功時確認 | 成功時の値は不明。保存rootfs既定`3` | default/user/runtime値を区別する | 保存rootfsのdefaultは実験成功時のAgent値を証明しない |
 | `BhPriority5GL`, `BhPriority5GH` | `2` Controller成功時確認 | 成功時の値は不明。保存rootfs既定`1` | 同上 | 5 GHz優先度の意味は同一機器の実装・profileを確認する |
 | `BhPriority6G` | `1` Controller成功時確認 | 成功時の値は不明。保存rootfs既定`1` | 同上 | 6 GHz BH成功は報告済み。Agent個別優先値を推定しない |
@@ -48,6 +48,8 @@
 | EasyMesh profile source | 5GHz authmode `0x0022` | `0x0040`; WTS BSS info id=6も合わせた | 保存値。秘密profileは非公開 |
 
 単なるUCIのradio設定変更ではEasyMesh runtime provisioningにより戻ることがあった。公開再現手順は完全なprofile writerを欠くため、これらの値を個別端末へそのまま適用できるコマンドとして扱わない。
+
+Controller roleのcertification-script writer候補、KnOS初期化で確認できたMapModeの書込み経路、見つからなかったKnOS flag writerの範囲は[Controller章](../docs/05-controller-setup.md)に記録した。再起動後保持を実機確認するためのreadback計画は[検証計画](../docs/28-controller-writer-validation.md)を参照。
 
 ## 成功判定に使った観測
 

@@ -46,11 +46,12 @@ kn_meshd (procd, START=99) → OEM preparation → wapp / p1905_managerd / mapd
 ```sh
 uci -q get knos.network.easymesh
 uci -q get knos.flags.mesh
-wificonf -f /etc/map/mapd_user.cfg get DeviceRole
-wificonf -f /etc/map/mapd_user.cfg get MapMode
+uci -q get mapd.mapd_user.DeviceRole
+uci -q get mapd.mapd_user.MapMode
+grep -E '^(DeviceRole|MapMode)=' /etc/map/mapd_user.cfg /etc/map/mapd_cfg
 ```
 
-最後の2コマンドの実装/出力形式は機器差があるため、実機でhelp確認できない場合は未確認として扱う。保存記録で確認できたwriterはAgent側の`wificonf -f /etc/map/mapd_user.cfg set DeviceRole 2`のみ。Controllerのrole writer、MapMode変更writer、KnOS UCIを1にするwriterは未復元。role値だけから架空の設定コマンドを作らない。詳細は[Controller](05-controller-setup.md)、[Agent](06-agent-setup.md)。
+これらはread-only readback。保存記録で確認できた実験writerはAgent側の`wificonf -f /etc/map/mapd_user.cfg set DeviceRole 2`。Controller roleの認定script候補とMapModeのKnOS初期化writerは静的解析で見つかったが、成功実験で実行した証拠がない。KnOS flagを1にするwriterも未復元。詳細は[Controller](05-controller-setup.md)、[Agent](06-agent-setup.md)。
 
 role/MapMode変更はネットワークを再構成しSSHを切る可能性がある。復旧経路を先に確保し、片側ずつ変更して状態を再採取する。変更後の管理IPが不明ならMesh失敗と判断せず、物理管理路、DHCP lease、neighbor table、consoleからIP/bridge状態を調べる。
 
@@ -88,4 +89,4 @@ MLOは6 GHz単独BHの成功後に行う上級追加試験である。2-link成�
 
 ## 再現範囲
 
-根拠が揃っている観測手順と、完全な操作列が残っていない構築工程を分けた判定は[再現性coverage](26-reproduction-coverage.md)に記載する。全工程をA（手順復元済み）と評価していない。これは読者に作業可否を判断してもらうための境界である。
+根拠が揃っている観測手順と、完全な操作列が残っていない構築工程を分けた判定は[再現性coverage](26-reproduction-coverage.md)に記載する。Controller writerの静的所見と所有者向け未実機検証計画は[専用章](28-controller-writer-validation.md)、profileは[構造仕様](../configs/templates/README.md)、証拠の時間不整合は[chronology](27-evidence-chronology.md)を参照する。全工程をA（手順復元済み）と評価していない。

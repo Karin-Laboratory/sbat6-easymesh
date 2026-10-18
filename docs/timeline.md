@@ -1,59 +1,56 @@
-# 実験タイムライン
+# 実験・記録タイムライン
 
-日付は公開記事、ファイル名、mtime、端末時刻を区別する。証拠が揃わない日付は範囲で示す。
+実験イベント時刻、capture内端末clock、ファイル名、host mtime、Web公開日を分けて並べる。イベント日時が未確定のものは、公開/整理された日で代用しない。詳細な日付比較は[証拠chronology](27-evidence-chronology.md)。
 
-## 実験準備（2026年8月以前・日付特定不能）
+## EasyMesh 2台構成・6 GHz BH・L2延長（イベント日時は未確定）
 
-- **目的:** root管理経路と純正EasyMesh機能を調査し、2台の役割を決める。
-- **変更/試行:** Web UI経由のコマンド実行、root/SSH補助スクリプト、daemon/config探索。初期侵入過程は本リポジトリの再現対象外。
-- **結果:** T6A/T6B各rootfsにMediaTek独自driverと`mapd`、`p1905_managerd`、`wapp`等があることを資料から把握。
-- **根拠:** SOURCES.mdの保存スクリプト・archive記録。
+- **目的:** SBAT6 A/BをController/Agentにして、有線onboardingから6 GHz無線backhaulへ移行し、Agent Ethernet側へL2延長。
+- **公開報告:** 本人Qiita記事の公開/更新日は2026-08-23。記事内の実験イベントの独立timestampは確認できない。
+- **役割/成功値:** T6A A Controller `DeviceRole=1`; T6B B Agent `DeviceRole=2`; 両方`MapMode=1`; KnOS flagsは双方1と報告。
+- **手順/確認:** 先にEthernetでonboarding/IEEE 1905.1 discoveryを確認し、`mapd_cli` topology/BH状態を観測。その後Ethernetを外して6GHz APCLI、BH、配下端末通信を確認。
+- **観測報告:** Controller距離0、Agent距離1、Backhaul Medium Type 6G、Agent `bh_conn_status=1`, `bh_conn_type=Type 4`。報告された無線値はchannel 21 / 6055 MHz / 160 MHz / 4addr on。Ethernet抜線後APCLI counterとL2通信を確認したと記事にある。
+- **性能:** 本体endpointの6GHz単独TCP測定はA→B約350 Mbps、逆方向約330 Mbps。歴史的endpoint値は[監査表](23-publication-audit.md)に掲載し、汎用コマンド例では使用しない。[性能章](11-performance.md)では空の設定変数を使う。
+- **根拠:** Qiita本人公開記事。生のCLI output/captureによる独立全行再解析とは区別する。
 
-## 2026-08-23（公開記事の日付）EasyMeshと6 GHz BH
+## MLO capture群（device-local clock表記: 2026-02-28〜03-01 JST相当）
 
-- **目的:** 2台をController/Agentにし、無線BHへ移行。
-- **役割:** T6A Controller (`DeviceRole=1`, `.2`)、T6B Agent (`DeviceRole=2`, 成功記事時`.223`)、双方`MapMode=1`。
-- **確認コマンド:** `mapd_cli /tmp/mapd_ctrl getrole`、`agent_list`、`dump_topology`、`dump_topology_v1`、`bh_info`、`bh_conn_status`、`bh_conn_type`、`get_bh_ap`、`get_fh_ap`。`onboarding 0`はCLI機能として記録されたが、常に手動実行したものではない。
-- **手順:** Ethernetを使ってonboarding/IEEE 1905.1 discoveryを成立させ、topology/BH情報を確認。その後、Ethernetを外して6 GHz APCLIでの維持を確認。
-- **実測報告:** Controller距離0、Agent距離1、Backhaul Medium Type 6G、Agent `bh_conn_status=1`、`bh_conn_type=Type 4`。6 GHz APCLI carrierとcounterが維持。
-- **性能コマンド:** T6B `iperf3 -s -B 192.168.3.223`。T6A `iperf3 -c 192.168.3.223 -B 192.168.3.2 -P 4 -t 20`、逆方向は`-R`を追加。結果はA→B約350 Mbps、逆方向約330 Mbps。
-- **次:** 成立した6 GHz BHに5+6 GHz MLOを追加。
-- **根拠:** Qiita本人公開記事、`mlo_apply_a/b.sh`等保存スクリプト。公開記事の値と生ログ独立再検証は区別する。
+MLO capture群はfilename内日付と内部`start_epoch`がdevice-local clock上で2/28〜3/1 JSTに整合する。clock offset/NTP記録がないため絶対calendar dateは確定しない。local host mtimeとRUNBOOK見出しは8月23日。後日まとめた文書日付をcaptureの実験日としない。
 
-## 2026-08-23（記事追記）5+6 GHz MLO
+- **19:02頃から23:40頃まで複数capture:** MLO leave/RSNE/security修正試験。初期2-linkが約109 msで解体し、M3時点RSNE mismatch/ reason 1 deauthを保存traceが示す。初期の`DISABLE_NETWORK`仮説は後続syscall traceで否定。
+- **原因:** 5GHz BH BSSのWPA2/PSK・PMF optionalと、6GHz SAE・PMF requiredのRSNEが不一致。UCIだけの変更はEasyMesh runtime profileで戻った。
+- **修正:** EasyMesh側のprofile元/WTS BSS info id=6 authmodeを合わせ、実効5GHz/6GHz条件をSAE/PMF requiredへ統一した後、M3/4-way handshake成功とconnectedを記録。hex authmodeを一般設定値としては公開しない。
+- **安定確認:** `mlo-stability-success`内包metaのstart epochはdevice-local clock上で2026-02-28 23:40:08 JST相当、captureは464秒の安定観測を報告。外側archive名`234815`は開始時刻`234008`と異なる。wall-clockの絶対日付は未検証。
+- **判定:** MLD `ref_cnt=2`, `band_idx=1/2`、両link counterの増加を確認した記録。日付由来は[chronology](27-evidence-chronology.md)参照。
 
-- **初期失敗:** MLO適用後約100 msで切断、wpa_supplicant RSNE mismatch。
-- **原因/修正（記事報告）:** 5 GHz WPA2系と6 GHz SAE/PMF必須のprofile不一致、およびEasyMesh runtime provisioningの5 GHz側profile書戻し。profile生成元を直し、SAE/PMF requiredへ統一。
-- **成功判定（記事報告）:** 4-way handshake、`mld_sta257 ref_cnt=2`、band_idx 1 (5 GHz)と2 (6 GHz)。両APCLI driver byte counterが転送中に増加。
-- **再起動試験（記事報告）:** `sync`→通常`reboot`。DHCP約170秒、EasyMesh再参加約173秒、少なくとも342秒MLO継続。設定変更/Wi-Fi再起動をせず復帰したと報告。
-- **性能:** T6本体endpointでは約330〜380 Mbps程度。T6を通るEthernet PC間で`iperf3.exe -c <server> -t 20 -P 10`（逆方向は`-R`）等を測り、1 stream約936/909 Mbps、10 stream約941/908 Mbps（正/逆方向）。両band counter増加を報告。
-- **根拠:** 公開Qiita本人報告と、role/MLD設定を含む保存スクリプト。キャプチャ原本は非公開で、公開資料作成時に全ログの独立再解析は行っていない。
+## post snapshot内のdevice-local epoch（2026-03-01 00:11:51 JST相当）
 
-## 2026-08-23ホスト保存snapshot（試験日未確定）
+- reboot persistence filenameには`20260721-124656`が含まれるが、timezone未記録、host mtimeは2026-08-23。
+- post fileの一箇所にepoch `1772291511`（2026-03-01 00:11:51 JST）がある。baseline/postの一貫した時刻軸や、2月MLO安定captureとの関係は未確定。
+- `.247`等の値は別snapshotの観測として扱う。8月記事の`.223`から連続したDHCP変化とは断定しない。
 
-- B再起動前後ファイル名に`20260721`を含むが、mtimeは8月23日、端末epochも不整合。厳密な採取日時/順序は未確定。
-- `.247/24`、role 2、MapMode 1、wireless/mapd hash一致を比較。一方、UP interfaceは`apclix0`から`apclii0`へ変化。
-- これは別snapshotでの保存状態・稼働interface観測。8月23日のMLO成功報告を否定しない。
+## 2026-08-23 (Web記事公開/更新、RUNBOOK見出し・host mtime)
 
-## 2026-08-24 EHT320試験案
+- 本人QiitaでEasyMesh/6GHz BH/MLO成功を報告。これは公開日であり、全実験の実施日を証明しない。
+- Private/local `sbair6-rce/RUNBOOK.md`のMLO sectionsは同日見出し、host mtimeも同日。この文書が2月metadataのcaptureを参照するため、実験記録と後日編集を区別する。
+- Qiitaは通常reboot後のMLO復帰を報告: DHCP約170秒、EasyMesh再参加約173秒、少なくとも342秒MLO継続。再起動後の成功報告を保持するが、capture日時の不整合を解決したものとは扱わない。
 
-- **目的:** 既知成功ベースラインと記述された160+160からEHT320候補へ試験する案。
-- **結果:** README上、未転送・未実行。後日のQiita MLO成功はEHT320の証拠ではない。
+## 2026-08-24/25 (host work記録)
 
-## 2026-08-25 別L2 payload測定
+- **8/24 EHT320案:** READMEでは160+160を既知成功baselineと記載。EHT320 test scriptは未転送/未実行。320 MHzのオンエア成立は未確認。
+- **8/25 L2 payload:** 独自payload試験約348–349 Mbit/s。iperf3 TCPと別方式。遅延・長時間安定統計なし。
 
-- **結果:** 独自payload試験で約348–349 Mbit/s。TCP iperf3とは異なる測定。遅延・長時間安定性の統計値は未取得。
+## 2026-09-25/26 (T6A SSH管理経路復旧)
 
-## 2026-09-25/26保存T6A復旧記録
+- `/data` seedと起動時one-shot overlay復元、cron/watchdogを用いたSSH鍵認証の復旧を保存runbookが記録。2 reboot後に鍵SSHが戻った実機報告。
+- 8月EasyMesh/MLO構成とは別の復旧作業。root password永続化成功の証拠ではなく、一般向けに実行手順を公開しない。
 
-- `/data`のseed archiveと`/data/sysupgrade.tgz`によるoverlay復元、cron/watchdogを使った鍵SSH復旧方式を記録。再起動2回後のSSH復帰を確認した記録がある。起動中の復元が遅く通常3〜4分待った。これは8月EasyMesh成功構成ではなく、別時期のT6A管理復旧。root password永続化の検証ではない。
+## 2026-10-18 (Private archive commit / source整理)
 
-## 2026-10-18 オフラインKnOS/SSH解析
+- Private archive HEAD `2725c5487a818e4b655bb868326f973c4d9e14ba`。commit日は資料の収録/編集時刻であって元の機器実験日ではない。
+- KnOS/SSHの静的解析資料と復旧runbookをarchive historyから照合。10/18個別SSH断の発火sourceは確定できていない。
 
-- Private archiveの歴史的Bank A/Bを静的解析。interface hotplug/WAN再構成からfirewall reloadする経路、`knos_config`のsystem_mode条件付きpasswd/shadow symlink再設定とDropbear enable切替を確認。`knos_uci_revert`のfirewall revert箇所はあるが直接caller不明。
-- procdのrcS runqueue完了からboot success flagへ進む経路を逆解析。120秒監視の対象flagを確認したが、遅延script特定は未完了。
-- 実機変更なし。掲示板投稿者の個別SSH断を発火したプロセスは未特定。
+## 2026-10-19 (公開版v1.0監査)
 
-## 後日管理状態（2026-10）
-
-- `.13`は後日のT6A単独STA管理候補で、EasyMesh成功時`.2`とは別モード/時期。Windows ping報告だけでは現在のCodex到達性、SSH listener、個体同一性を示さない。
+- Controller writer候補、MapMode初期化経路、KnOS flagの未発見範囲を静的解析から記載。
+- 公開profile templateの代わりに、秘密値や未復元schemaを含まない構造仕様を作成。
+- capture/host/document dateを分け、A/B IP履歴を現在の接続手順から排除。機器接続・変更なし。

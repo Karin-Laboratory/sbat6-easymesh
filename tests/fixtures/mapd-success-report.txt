@@ -1,19 +1,36 @@
-# Normalized test fixture; NOT a raw console transcript.
-# Values are the public-report forms from Qiita article 70222d4e64319c0989d3.
-# Device/network identifiers and all credential-bearing fields are absent.
+# Transcribed/normalized from the public Qiita article, not a raw device log.
+# These sections exercise parsers only; they are not a commissioning recipe.
 [getrole-agent]
+dev_role 2
+
+[getrole-text]
 Device role: 02
 
 [getrole-controller]
 1
 
 [dump_topology]
-Device role: 02
-Distance from controller: 1
+Controller Distance from controller: 0
+Agent 1 Distance from controller: 1
+Agent 2 Distance from controller: 2
 Backhaul Medium Type: 6G
 
+[topology-with-unrelated-6g]
+Radio capability includes 6G
+Distance from controller: 1
+
 [bh_conn_status]
-backhaul connection status 1
+1
 
 [bh_conn_type]
-backhaul connection Type 4
+Type 4
+
+[bh-invalid]
+state=degraded code=12 retry=9
+
+[mlo]
+MLD ref_cnt = 2
+link band_idx = 1
+link band_idx = 2
+
+[empty]

@@ -64,6 +64,27 @@
 
 作業環境上の`projects/sbair6-rce`は対象資料がGit commitで追跡されないprivate/local work areaであり、2026-10-19時点でファイルpathと保存capture名を照合した。公開可能なcommit SHAはないため、該当箇所はその旨を明示し、ファイル内容を転載していない。MLOの一部capture名（2026-02-28）とRUNBOOK見出し/記事日付（2026-08-23）は一致せず、同一日時の証拠として扱っていない。
 
+## v1.0完成監査・追加解析（2026-10-19）
+
+| 解析資料 | Source path / revision | 利用範囲と限界 |
+|---|---|---|
+| Controller role writer候補 | Private/local選定rootfs `projects/sbair6-rce/analysis/vendor-backup/rootfs-a/usr/bin/map_cert_script.sh`, host archive set (Git SHAなし) | certification helperのOpenWrt branchで`DeviceRole=1`を`/etc/map/mapd_user.cfg`へ書く`datconf`経路を静的確認。成功記事の実験でこのhelperを実行した証拠なし。コード転載なし |
+| MapMode/KnOS flag初期化 | `analysis/vendor-backup/rootfs-{a,b}/etc/uci-defaults/99-zknos-default-setting-official-0201.mesh`, `...0000.system`, `etc/uci-revert/99-zknos-default-revert-official-0201.mesh` (Git SHAなし) | EasyMesh flagを読む条件分岐からMapModeをmapd UCI sectionsへ書きcommitする経路、mesh flag default carry-forward、EasyMesh=0へのrevertを静的確認。EasyMesh/mesh flag positive writerは選定rootfsテキスト検索で未発見 |
+| MLO capture群 | `projects/sbair6-rce/work/captures/mlo-*-20260228-*.tar.gz`; file metadata internally preserved, local host mtime 2026-08-23 | filenamesとmetadata `start_epoch`はdevice-local clock上で2026-02-28 23:40:08 JST相当。外部clock offset/NTP記録なし、絶対dateは未検証。内容/個体識別を公開せず日時由来のみ使用 |
+| Reboot snapshot | `work/reboot-persistence/t6b-reboot-persistence-20260721-124656-{baseline,post}-B.txt`; local host mtime 2026-08-23 | filenameとmtime、postに残るdevice-local epoch（2026-03-01 00:11:51 JST相当）が不一致。外部clock sync未確認。`.223`との連続IP変化を証明しない |
+| SSH復旧runbook | Private archive HEAD `2725c5487a818e4b655bb868326f973c4d9e14ba`; file/blob SHAは上段参照 | 2026-09 T6A recoveryと2026-02/08 EasyMesh/MLO evidenceを分離。実行手順を公開しない方針を決定 |
+| Profile構造仕様 | public `configs/templates/README.md` | 秘密/機器固有値を除き、実際の入力位置、確認済みfield tokenとschema不足のみを要約。適用可能なprofile例ではない |
+
+日時不整合と信頼度の評価は[docs/27-evidence-chronology.md](docs/27-evidence-chronology.md)、Controller writerの調査過程は[docs/05-controller-setup.md](docs/05-controller-setup.md)および[docs/28-controller-writer-validation.md](docs/28-controller-writer-validation.md)。
+
+| 公開用追加物 | 根拠/実装 | 制約 |
+|---|---|---|
+| `docs/27-evidence-chronology.md`, `docs/timeline.md` | local file metadata、capture内部`start_epoch`、Private archive Git history、Qiita公開日 | 機器/host時計の不一致を表として記録。日付原因を推測しない |
+| `docs/28-controller-writer-validation.md` | 上記rootfs UCI init、`map_cert_script.sh`のwriter候補、既存RUNBOOK/記事 | statically-derived owner validation plan。端末でのwriter実行・保持は未検証 |
+| `configs/templates/README.md` | 保存`mapd_user.cfg`/runtime profileのkey・WTS id 6 authmode差分、MLO RSNE trace | vendorファイルの完全なpositional schema/秘密profileを掲載しない。適用可能なtemplateではない |
+| `tests/test_ssh_stdin_example.py` | 本repoのdiagnostic scriptを仮SSH executableへstdin送信するmock | 実SSHや機器接続は行わず、quoted target/`sh -s`/stdin redirectionだけ検証 |
+| `.github/workflows/docs-audit.yml` BusyBox step; `tests/test_repo_audit.py` | local `/usr/bin/busybox` ashで同じ構文とfixture self-testを確認 | scriptの実機SBAT6互換性/設定変更動作を保証しない |
+
 2026-10-19にQiitaとGitHub公開資料を`SBAT6 EHT320`等で検索したが、別のSBAT6 EHT320成功公表は見つからなかった。これは検索範囲内の結果で、存在しないことの網羅的証明ではない。
 
 **取得できなかった/独立照合できない資料:** 5ch投稿の元スレッド生ログ、2026-08 MLO全captureの公開可能な生ログ、投稿者の現在端末での実行時trace、root passwordの再起動認証結果、EHT320の後続オンエア測定。公開Qiitaに記載された実績を否定する意味ではなく、証拠形態を分けるため記載する。

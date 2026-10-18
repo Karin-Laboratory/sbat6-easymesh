@@ -1,12 +1,12 @@
 # 10. 5 GHz＋6 GHz MLO（上級編）
 
-この章は、6 GHz単独EasyMesh backhaulが成立した後の追加実験を扱う。MLO設定項目やコードが存在することと、複数リンクが同時に成立したことは別である。以下は2026-08-23公開記事と保存済み解析資料で確認できた範囲で、再現用の無条件投入スクリプトではない。
+この章は、6 GHz単独EasyMesh backhaulが成立した後の追加実験を扱う。MLO設定項目やコードが存在することと、複数リンクが同時に成立したことは別である。以下は2026-08-23公開記事の成功報告と、filename/internal epochがdevice-local clock上で2026-02-28を示す保存capture、8/23見出しのRUNBOOKを分けてまとめたもの。外部clock offsetがないため絶対実験日は未検証。公開日・文書見出しを全試験の実施日とは扱わず、再現用の無条件投入スクリプトも提示しない。
 
 ## 成立を確認した証拠
 
 公開記事は5 GHz/6 GHzの2-link MLOについて、STA側`mld_sta257`の`ref_cnt=2`、`band_idx=1`と`band_idx=2`、4-way handshake完了、両linkの転送counter増加を報告する。再起動試験では通常の`sync; reboot`後にDHCP約170秒、EasyMesh再参加約173秒、MLOが少なくとも342秒維持された。起動直後からの無停止を意味しない。
 
-保存済み安定性captureの記録は464秒の安定観測と両band indexを含む。ただしcapture名の日付（2026-02-28）とRUNBOOK見出し（2026-08-23）、記事の日付が一致しない。独立した同一試験と断定せず、日付由来の不整合を保持する。capture中は物理APCLIの一方のcarrier表示がdownでもMLD配下linkが成立している場合があり、APCLI単体carrierだけでMLO状態を判定しない。
+保存済み安定性captureの記録は464秒の安定観測と両band indexを含み、内部start epochはdevice-local clock上で2026-02-28 23:40:08 JST相当。外部clock offset/NTP記録はなく絶対日付は未検証。artifact filename末尾は`234815`、内包directory/start epochは`234008`である。保存host mtimeとRUNBOOK見出し、Qiita公開日は2026-08-23。artifact作成時刻、実験event、文書作成日が一致するとは断定せず、詳細は[証拠chronology](27-evidence-chronology.md)に分けた。capture中は物理APCLIの一方のcarrier表示がdownでもMLD配下linkが成立している場合があり、APCLI単体carrierだけでMLO状態を判定しない。
 
 ## 初回失敗から修正まで
 

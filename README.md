@@ -2,6 +2,16 @@
 
 SoftBank Air Terminal 6（SBAT6 / SBAT6A相当）2台で、EasyMesh Controller/Agent の親子関係を作り、Ethernetでの初期オンボーディングから6 GHz無線バックホール、子機側EthernetへのL2延長までを実機で確認した記録です。成功条件だけでなく、管理経路断、設定の再生成、復旧策、追加のMLO成功報告と後続検証も、確認できる範囲で時系列にまとめています。
 
+> この資料は、所有するSBAT6のroot権限を取得済みで、独立した復旧経路を確保できる人向けの実験・再現ガイドです。EasyMesh Controller設定、無線profileの導入・変更には機種固有の実装確認が必要です。全端末へ一括適用できる完全な設定手順は公開されていません。本資料v1.0は確認済み事実、適用条件、再現可能範囲、未検証事項を分けて記録します。
+
+### 読者別の前提
+
+- **観測・診断を行う人:** root SSHを利用でき、読み取り専用の状態確認とログ解析を行う。機器へ設定変更は行わない。
+- **EasyMesh設定を試す人:** root SSHに加えてUART/console等の独立復旧経路、現行firmwareに対応する設定変更手段、変更前backupとrollback方法を用意する。完全なwriterが未復元の工程は個体ごとの実装確認が必要。
+- **MLOを追試する人:** 6 GHz単独BHを確認済みで、5/6 GHz BSS、SAE/PMF、EasyMesh profile生成元、MLD設定を確認・変更できる上級者を対象とする。
+
+GitHub Actionsの成功は文書・scriptの静的検査結果であり、SBAT6実機での設定変更や再現成功を意味しません。v1.0は全端末での完全な再現保証ではなく、確認済み事実、適用条件、再現可能範囲、未検証事項を分けた技術資料です。
+
 ## 実現した構成
 
 ```text
@@ -37,6 +47,8 @@ SoftBank Air Terminal 6（SBAT6 / SBAT6A相当）2台で、EasyMesh Controller/A
 - **5 GHz＋6 GHz MLOまで試したい** → [MLO詳細ガイド](docs/10-mlo.md)
 - **問題が起きた** → [症状別トラブルシューティング](docs/25-easymesh-troubleshooting.md)
 - 工程別に再現可能範囲を確認 → [再現性coverage](docs/26-reproduction-coverage.md)
+- Controller role writerの調査と所有者向け検証計画 → [writer検証計画](docs/28-controller-writer-validation.md)
+- 無線profileの構造と非公開要素 → [profile構造仕様](configs/templates/README.md)
 
 クイックスタートは観測と実験記録に基づく段階ガイドである。Controller roleのwriter、無線profileの全投入手順、完全な成功snapshotは保存記録から復元できていないため、実行前提を満たせない工程を推測で補わない。
 
@@ -52,6 +64,7 @@ SoftBank Air Terminal 6（SBAT6 / SBAT6A相当）2台で、EasyMesh Controller/A
 - [KnOS設定復元](docs/17-knos-configuration-reset.md) · [SSH/firewall永続化](docs/18-ssh-firewall-persistence.md) · [root password](docs/19-root-password-and-authentication.md) · [SSH切断診断](docs/20-ssh-loss-troubleshooting.md)
 - [EasyMesh設定値の比較表](configs/easymesh-values-matrix.md) · [安全な読み取り専用診断スクリプト](scripts/sbat6-diagnose.sh)
 - [6 GHzクイックスタート](docs/24-easymesh-quickstart.md) · [トラブルシューティング](docs/25-easymesh-troubleshooting.md) · [再現性coverage](docs/26-reproduction-coverage.md)
+- [証拠資料の日付整理](docs/27-evidence-chronology.md) · [Controller writer検証計画](docs/28-controller-writer-validation.md) · [profile構造仕様](configs/templates/README.md)
 - [時系列](docs/timeline.md) · [技術的知見](docs/technical-findings.md) · [未解決事項](docs/unresolved-issues.md) · [公開前監査](docs/23-publication-audit.md)
 - [公開証跡索引](evidence/INDEX.md) · [出典対応表](SOURCES.md) · [変更履歴](HISTORY.md)
 

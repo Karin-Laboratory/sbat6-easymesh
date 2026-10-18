@@ -46,6 +46,12 @@ Dropbearは通常`/etc/init.d/dropbear`がprocdへservice定義・起動条件�
 
 ## 2026-09 T6A `/data`復旧方式
 
+### 公開方針: 案B（実行手順は非公開、一般向け再現対象外）
+
+過去のT6AでSSH鍵認証経路を2回連続再起動後に復帰させた実機記録はある。一方、この方式は当該機器のKnOS overlay boot flow、`/data`の保持、one-shot `sysupgrade.tgz`消費順、Dropbear/firewall実装に依存する。rootfs/build/個体へ安全に移植できる実行手順、archiveを作る正確な最終manifest、独立rollbackを公開資料だけで保証できないため、実行可能なseed作成・cron/watchdog scriptや手順は公開しない。
+
+公開するのは構造、成功条件、明確な制約までとする。秘密鍵・authorized_keys本文、端末固有IP/識別値、メーカー秘匿ファイルは非公開。root passwordの再起動後認証は未検証で、鍵認証成功から推定しない。
+
 保存されたprivate runbookの記録では、`/data`は再起動をまたいで残る領域で、`/data/sysupgrade.tgz`は通常起動時にoverlayへ展開された後に消費されるone-shot入力だった。復元対象をそこへ一度置くだけでは次のbootで消えるため、同じ内容のseed `/data/sbat6-ssh-overlay.tgz`を永続領域に保持し、root cronが毎分seedから`/data/sysupgrade.tgz`を再配置した。起動時にはone-shot archiveが展開され、Dropbear関連ファイルと起動補助物がoverlayへ戻る。20秒間隔のwatchdogがruntime SSH listener/firewallを観測・復旧する構成も記録されている。
 
 ```text
@@ -62,6 +68,15 @@ SSH鍵認証の管理経路が復帰
 ```
 
 runbookではSSH復帰まで約3〜4分待ち、2回連続の再起動でも鍵認証を確認した。300秒delay variantは存在するが独立成功は確認されていない。seedに`/etc/passwd`と`/etc/shadow`は含まれず、この結果はpassword persistenceの証拠ではない。
+
+| 保存variant | 記録から言える範囲 | 公開判断 |
+|---|---|---|
+| `t6a_persistent_ssh_seed.sh` | seed archiveを準備するscript variantとして保存 | 詳細実行列・archive内容は非公開 |
+| `t6a_persistent_ssh_seed_cron.sh` | cronからone-shot archiveをおよそ60秒間隔で再配置するvariant。**runbook上の2 reboot成功設計**と最もよく一致 | runbookでの成功は記録、完全scriptとarchiveのhash対応は公開しない |
+| `t6a_persistent_ssh_seed_delay.sh` | 300秒待機する版が存在 | 独立成功記録なし。成功版と呼ばない |
+| `t6a_ssh_keepalive_v2_install.sh` | 後続keepalive installer variant。保存runbookは約20秒間隔でSSH listener/firewall conditionを観測するwatchdogを説明 | このinstaller単体の独立成功、runbook最終archiveとの厳密な同一性は未確定。条件・script原本は非公開 |
+
+最終の成功実証として採用するのはPrivate archiveの`T6A_RECOVERY_RUNBOOK_FOR_AI.md`にあるseed+minute cron+listener/firewall watchdogの構成記述であり、delay variantではない。成功条件はSSH鍵認証listenerが戻るまで約3〜4分待つこと、同じT6Aで連続2 reboot後にも戻ること。正確な単一script revisionとarchive payloadを独立artifact hashへ結び付けられないため、構造の実機成功と一般再現可能性は分ける。
 
 この方式は通常の設定変更手順として推奨するものではない。cronとwatchdogの競合、誤ったoverlayによるロックアウト、起動時のKnOS再生成との競合、永続seedの改ざんリスクがある。私有runbook/scriptを本repoへ転載せず、履歴・ファイルhashは[SOURCES.md](../SOURCES.md)に記録する。復旧用途であっても、対象個体の一致、別経路、archive内容、overlayの復元対象、停止手段を先に検証する必要がある。
 

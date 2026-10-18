@@ -5,19 +5,24 @@
 6 GHz単独BH時、T6B serverとT6A clientで4 stream/20秒のTCP測定を実施したと本人記事は記録する。記事記載例:
 
 ```sh
-# T6B
-iperf3 -s -B 192.168.3.223
-# T6A → T6B
-iperf3 -c 192.168.3.223 -B 192.168.3.2 -P 4 -t 20
+# 現在の検証用endpointを実環境で確認して設定する。空値のままでは中止。
+SERVER_IP=''
+CLIENT_BIND_IP=''
+: "${SERVER_IP:?現在のserver IPを確認して設定する}"
+: "${CLIENT_BIND_IP:?現在のclient側bind IPを確認して設定する}"
+# T6B上でserver
+iperf3 -s -B "$SERVER_IP"
+# T6AからT6Bへ
+iperf3 -c "$SERVER_IP" -B "$CLIENT_BIND_IP" -P 4 -t 20
 # 逆方向
-iperf3 -c 192.168.3.223 -B 192.168.3.2 -P 4 -R -t 20
+iperf3 -c "$SERVER_IP" -B "$CLIENT_BIND_IP" -P 4 -R -t 20
 ```
 
-報告値はA→B約350 Mbps、B→A約330 Mbps。MLO後もT6A/T6B本体をendpointにした4 stream測定はA→B約330〜350 Mbps、B→A約350〜380 Mbps程度で、6 GHz単独と大きな差が見えなかった。
+IP変数は空の例なので、手入力確認せず実行すると中断する。記事のhistorical commandではT6B server=`192.168.3.223`、T6A client bind=`192.168.3.2`だった。これは測定記録であり現在値ではない。報告値はA→B約350 Mbps、B→A約330 Mbps。MLO後もT6A/T6B本体をendpointにした4 stream測定はA→B約330〜350 Mbps、B→A約350〜380 Mbps程度で、6 GHz単独と大きな差が見えなかった。
 
 ## Ethernet端末間のMLO測定
 
-記事のPC間測定は1GbEで接続した有線PCを使い、1 stream測定、10 stream測定、および逆方向測定を行う。本文に示された例は`iperf3.exe -c <PC側server IP>`、`iperf3.exe -c <PC側server IP> -t 20 -R`、`iperf3.exe -c <PC側server IP> -t 20 -P 10`、`iperf3.exe -c <PC側server IP> -t 20 -P 10 -R`。実験記事の一時サブネット/IPをここでは再利用しない。
+記事のPC間測定は1GbEで接続した有線PCを使い、1 stream測定、10 stream測定、および逆方向測定を行う。再測定は両PCの現在IPを確認して`iperf3.exe -c "$PC_SERVER_IP" -t 20`、`-P 10`、`-R`を組み合わせる。historical articleの一時subnet/IPは再利用しない。変数が空/不明なら実行せず止める。
 
 本体CPU/TCP endpointがボトルネックの可能性を調べるため、PCを各T6のEthernetへ接続して測定した。Qiitaには次の結果が記録される。
 

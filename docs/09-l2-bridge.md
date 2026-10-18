@@ -76,13 +76,15 @@ MLO成功後の別試験は、両SBAT6の外側に1GbE PCを接続し、PC間で
 iperf3 -s
 
 # PC-A (Controller側)
-iperf3 -c <PC-Bの現在IP> -t 20 -P 1
-iperf3 -c <PC-Bの現在IP> -t 20 -P 1 -R
-iperf3 -c <PC-Bの現在IP> -t 20 -P 10
-iperf3 -c <PC-Bの現在IP> -t 20 -P 10 -R
+PC_SERVER_IP=''
+: "${PC_SERVER_IP:?PC-Bの現在IPを確認して設定する}"
+iperf3 -c "$PC_SERVER_IP" -t 20 -P 1
+iperf3 -c "$PC_SERVER_IP" -t 20 -P 1 -R
+iperf3 -c "$PC_SERVER_IP" -t 20 -P 10
+iperf3 -c "$PC_SERVER_IP" -t 20 -P 10 -R
 ```
 
-これらは一般的なiperf3再測定例。保存した成功時フルcommand transcriptではない。起動中のiperf3 serverは実験後停止し、試験portを外部/WANへ公開しない。
+PC-Bのserverを起動し、PC-A側で実環境のIPを`PC_SERVER_IP`へ手動設定してから測る。空値のままでは中止する。これらは一般的なiperf3再測定例で保存した成功時フルcommand transcriptではない。起動中のiperf3 serverは実験後停止し、試験portを外部/WANへ公開しない。
 
 ## L2成功の限界と失敗時
 

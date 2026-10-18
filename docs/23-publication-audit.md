@@ -64,3 +64,20 @@ Private `SBAT6A-Offline-Archive` remote HEAD `2725c5487a818e4b655bb868326f973c4d
 - `sbat6-tools`にPR/Issueなし。`sbat6-usb-nic`のPR #8/#9とIssue #1〜#7はUSB NIC関連で本件の根拠には使用しない。Private archiveのdraft PR #1は独立OpenWrt porting案でEasyMeshとは無関係。対象repoに既存PR/Issueなし。
 
 監査の出典パス・commit/blob SHAは[SOURCES.md](../SOURCES.md)を参照する。
+
+## v1.0完成監査（2026-10-19）
+
+- READMEに読者別の前提、完全一括設定が未公開であること、CIと実機確認の違いを明記。
+- Quickstart先頭にYes/No停止条件を追加。diagnosticはSSH stdinで実行可能とし、リモート端末へ一時script fileを書かない。
+- Controller writerを再探索。認定script内の`datconf` role 1候補、EasyMesh=1条件でMapMode UCIをcommitする静的処理を確認。一方、成功実験での実行証拠とKnOS flag positive writerは未取得。Controller作業はB判定のまま。
+- profileの部分項目とschema限界を`configs/templates/README.md`に記載。これは適用可能な設定ファイルではなく、完全なprofile投入手順未復元。
+- SSH鍵復旧の公開方針を案Bに決定。過去のT6A鍵SSH復帰と2回再起動条件を説明し、script/再現用archive作成方法は非公開。root password persistenceと混同しない。
+- MLO captureのfilename/internal device-clock epoch（2/28–3/1 JST相当、絶対wall clock未検証）とhost mtime/RUNBOOK見出し/記事公開日（8/23）を`docs/27-evidence-chronology.md`とtimelineで分離。`.223`と`.247`を別snapshotとして維持。
+- 実行例から歴史IPを除去し、現在値を手動設定する空のshell変数を利用。historical値は監査・性能結果の説明文だけに残した。
+- 診断parserのrole形式、複数distance、mediumラベル限定、BH status/type、MLO band/ref count、無関係な6G、numeric noise、空応答をfixtureで確認。hostname等を出力せず、listener不明を停止と断定しない。iptables INPUT rule数は`-A INPUT`行のみ集計。
+- POSIX shとBusyBox ashで30件のshell code fenceと診断script構文/fixture、SSH stdin quoting mock test、10 unittest、link/artifact/read-only checksが成功。GitHub ActionsにはBusyBox検査を追加。
+- 残る必須未解決: Controller writerの実機readback、KnOS flag positive writer、適用可能な完全profile、MLO長時間/全firmware検証、EHT320。これはv1.0で過大主張しないための明示的境界。
+
+### v1.0判定
+
+公開記録は、再現可能な観測、静的な構造解析、実機設定変更の未検証箇所、証拠の日付不整合を分離して提示できる状態になった。全端末向けの一括手順やController設定の実機検証は未達であり、ユーザー定義のv1.0では未解決として許容された範囲である。GitHub Actionsの実行結果と公開tagは、push後に本章へ追記する。

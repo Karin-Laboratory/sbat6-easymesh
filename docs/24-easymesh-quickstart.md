@@ -4,6 +4,21 @@
 
 > **中止条件:** UART/console等の独立した復旧経路がない、現在IP・装置個体・firmwareを確認できない、または設定差分とrollback手順を用意できない場合は、変更せず観測だけにする。特にAgent化、MapMode変更、Wi-Fi再構成、rebootはSSHを失う可能性がある。
 
+## 開始前チェック（Yes/No）
+
+| 確認 | Yesなら | Noなら停止位置 |
+|---|---|---|
+| 対象2台の所有者で、両方とも既にroot SSHを利用できるか | 次へ | root取得手順は対象外。変更しない |
+| 本体ラベル/hostname等を使ってA/Bの個体をIPと独立に識別できるか | 次へ | Step 2へ進まない |
+| 両機のmodel、firmware/bank、radio/interfaceを記録したか | 次へ | Step 1で観測だけ実施 |
+| UART/console等、SSHとは独立した復旧経路が両機にあるか | 設定確認へ | Step 5以降の変更をしない |
+| 現行firmwareに合うrole/profile writerを確認したか | 所有者の検証計画へ | Controller writerやprofile変更を試さない |
+| backupが取得でき、対象個体で戻す方法を確認したか | 有線観測へ | 設定変更をしない |
+| 上位LAN、DHCP server位置、bridge/portを特定したか | 配線へ | Ethernetを接続せずに止める |
+| 6 GHz利用が地域規制と機器設定上許可されるか | 無線検証候補へ | 6 GHz移行をしない |
+
+この一覧を通過しても、本書に未復元とある個体固有writer/profileの安全性や成功を保証しない。構築の全操作列はB判定の工程を含み、現機器の実装確認が別途必要。
+
 ## 配線の考え方
 
 物理LAN/WANポート番号やケーブルを挿した実ポート名は保存資料から特定できない。各個体のラベルと現在のbridge memberを確認し、WAN/LANを推測で指定しない。
@@ -82,15 +97,16 @@ done
 
 **コマンド (各機):**
 
-管理PC上でまずrepoのscriptを検査する。端末へ置いて実行する場合は、現在の管理IPを確認して一時領域へ転送する（`<現在の管理IP>`は所有者が特定した値に置換）。
+管理PC上でrepoのscriptを検査する。SSH標準入力から実行すると、端末上にscript fileを配置せずに済む。`TARGET_IP`には所有者が現行管理経路で確認した値を代入する。
 
 ```sh
+TARGET_IP=''
+: "${TARGET_IP:?現在の管理IPを手動で確認して設定する}"
 sh -n scripts/sbat6-diagnose.sh
-scp scripts/sbat6-diagnose.sh root@<現在の管理IP>:/tmp/sbat6-diagnose.sh
-ssh root@<現在の管理IP> 'sh /tmp/sbat6-diagnose.sh'
+ssh "root@${TARGET_IP}" 'sh -s' < scripts/sbat6-diagnose.sh
 ```
 
-このscriptは読み取り専用で、IP/MAC/SSIDを隠す。転送した一時ファイルは診断後に削除してよい。共有ログへ端末内の未匿名化出力を貼らない。
+ここでは意図的に空値で示すため、値を設定しないまま実行するとshellが中止する。scriptは読み取り専用で、出力のIP/MAC/SSIDを隠す。共有ログへ別途採取した未匿名化情報を貼らない。
 
 **期待状態:** SSH daemon/procd、listen port、管理interface、DeviceRole/MapMode、mapd process、APCLI状態が`unknown`でなく採取できる。6 GHz BH未成立なら`apclix0`がdownでも異常ではない。
 
@@ -261,7 +277,7 @@ done
 PC-A -- Controller A ))) 6 GHz BH ((( Agent B -- PC-B
 ```
 
-**汎用iperf3確認:** PC-Bで`iperf3 -s`、PC-Aから`iperf3 -c <PC-Bの現在IP> -t 20`、逆方向は`iperf3 -c <PC-Bの現在IP> -t 20 -R`。実験当時のPC IPや管理IPを流用しない。テスト前後にAgent APCLI RX/TX bytesが増えることも確認。
+**汎用iperf3確認:** [L2検証章](09-l2-bridge.md#ethernet-pc間)の空変数付きコマンド例を使う。PC-Bでserverを開始し、PC-Aへ現在確認したserver IPを手入力する。履歴のPC/管理IPを流用しない。テスト前後にAgent APCLI RX/TX bytesが増えることも確認。
 
 **期待状態:** PC端末からのEthernet抜線中のL2/L3到達。本人公開記事は有線client間のping/iperf3を報告するが、全VLAN/multicast/MTU網羅試験はない。
 
