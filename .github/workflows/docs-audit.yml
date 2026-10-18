@@ -1,0 +1,28 @@
+name: Documentation and safety audit
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Shell syntax
+        run: sh -n scripts/sbat6-diagnose.sh
+      - name: Documentation, artifact and read-only checks
+        run: python3 -m unittest discover -s tests -v
+      - name: Secret scan (including Git history)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

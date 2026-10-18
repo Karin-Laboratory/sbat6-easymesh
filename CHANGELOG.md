@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-19 再現性・診断補強
+
+- `docs/18`と`docs/19`を復旧記録・KnOSのpasswd/shadow参照経路まで拡充し、一般OpenWrtの説明、SBAT6静的解析、過去実機確認を区別。
+- Controller/Agent値の根拠と不明点を示す`configs/easymesh-values-matrix.md`を追加。
+- 秘密値を読まず、IP/MAC/SSIDをマスクしてstdoutへ表示する読み取り専用`scripts/sbat6-diagnose.sh`を追加。
+- Markdownリンク、禁止artifact、shell syntax、diagnostic read-only契約とCI secret scanを追加。
+- テスト、secret/history scan、差分・リンク・スクリプト安全性を監査。実機アクセス/変更なし。
+
 ## 2026-10-19
 
 - SBAT6 EasyMeshの日本語技術記録を新規公開。

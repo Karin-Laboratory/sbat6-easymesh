@@ -43,6 +43,16 @@
 | `src/t6a/scripts/t6a_persistent_ssh_seed.sh` / `_cron.sh` / `_delay.sh` / `t6a_ssh_keepalive_v2_install.sh` | archive HEAD `2725c5487a818e4b655bb868326f973c4d9e14ba`; blobs `d709834ff7f8fef653b5155b6bca5cd68a005f3e`, `e405ba0c34df14f5c927e78be299e0a6c7a1d64b`, `55c3e25a1103cf4f38dcb3a3a2a90badad50b0df`, `3e625529b2e27706360521add510afde344f24d3` | 14, 18–19, 22 | Private remoteとlocal file一致。独自歴史scriptを解析。固定IP/鍵/副作用のため転載せず、実行手順として公開しない |
 | `src/t6a/T6A_RECOVERY_RUNBOOK_FOR_AI.md` | archive HEAD `2725c5487a818e4b655bb868326f973c4d9e14ba`, 2026-09-26 | 14, 18–19 | 2 reboot後の鍵SSH復帰とoverlay seed方式を歴史記録として要約 |
 
+## 再現性・診断補強（2026-10-19）
+
+| 公開用資料 | 根拠 | 利用範囲 | 注記 |
+|---|---|---|---|
+| `configs/easymesh-values-matrix.md` | 上記Qiita本人記事、`projects/sbair6-rce/work/mlo_apply_a.sh`/`mlo_apply_b.sh`、保存rootfsのdefault/user/runtime設定と2026-09 snapshot | 役割別DeviceRole/MapMode、BH優先値、daemon、BH/APCLI、bridge/DHCP、MLOの比較 | 秘密値を含む完全設定ではない。Agent成功時に不明な値を既定値から推定していない |
+| `docs/18-ssh-firewall-persistence.md` | Private archive recovery runbook、seed/cron/delay/watchdog script群とSSH/firewall vendor分析（上表参照） | Dropbear/procd、UCI firewall、overlay one-shot/cron復旧記録、確認順 | script原本は転載なし。一般的OpenWrt動作とSBAT6静的解析/実機復旧記録を分離 |
+| `docs/19-root-password-and-authentication.md` | 選定Bank A/B rootfsのpasswd/shadow symlinkと`knos_config`条件分岐の保存解析（2026-09、前掲sbair6-rce source） | 参照元/書込先/起動時再選択の静的評価 | hash/秘密値を収録せず、password persistenceは未検証 |
+| `scripts/sbat6-diagnose.sh` | 本作業で新規作成したPOSIX shの読み取り専用コード | IP/MAC/SSIDを隠したpoint-in-time診断 | 独自著作。設定変更、認証ファイル内容取得、targetへの書込なし |
+| `tests/test_repo_audit.py`, `.github/workflows/docs-audit.yml` | 本作業で新規作成 | shell syntax、Markdown内部参照、binary artifact、diagnostic read-only contract、CI secret scan | CI/テストは開発環境でのみ実行。実機未接続 |
+
 2026-10-19にQiitaとGitHub公開資料を`SBAT6 EHT320`等で検索したが、別のSBAT6 EHT320成功公表は見つからなかった。これは検索範囲内の結果で、存在しないことの網羅的証明ではない。
 
 **取得できなかった/独立照合できない資料:** 5ch投稿の元スレッド生ログ、2026-08 MLO全captureの公開可能な生ログ、投稿者の現在端末での実行時trace、root passwordの再起動認証結果、EHT320の後続オンエア測定。公開Qiitaに記載された実績を否定する意味ではなく、証拠形態を分けるため記載する。

@@ -1,5 +1,7 @@
 # 15. 再現ガイド（記録から安全に言える範囲）
 
+実験時の完全な設定snapshotは公開できる形で残っていません。再現は固定コマンドを一括投入する手順ではなく、個体/firmware確認、現状採取、Ethernet onboarding、親子認識、6 GHz BH、抜線後L2通信の順に段階判定する方式です。各値の確度と役割差は[EasyMesh設定比較表](../configs/easymesh-values-matrix.md)、read-only状態採取は[診断script](../scripts/sbat6-diagnose.sh)、SSH復旧順は[永続化・復旧章](18-ssh-firewall-persistence.md)を参照してください。
+
 成功条件と主要な測定値は本人公開記事に記録されている。一方、完全なredacted成功snapshotと全コマンドログは公開可能な形で揃っていないため、自動投入レシピではなく段階別の検証計画を示す。
 
 ## 前提

@@ -1,5 +1,14 @@
 # 変更履歴
 
+## 2026-10-19 再現性・診断補強
+
+- SSH/firewall永続化をDropbear+procd、UCI、overlay seed/cron、KnOS再構成の4方式で再整理し、変更前から失敗時復旧までの確認順を追加。
+- root passwordのKnOS symlink参照元と再起動時の再選択を説明。password persistenceは引き続き未検証と明記。
+- Controller/Agentの実測値、保存rootfs default、未確定値を分離したEasyMesh設定比較表を追加。
+- stdout専用・読み取り専用・IP/MAC/SSIDをマスクするBusyBox sh診断scriptを追加。
+- Markdown/artifact/read-only contractテストとGitHub Actions secret scanを追加。
+- 5ch返信の詳しい記録URLをそのまま共有できる絶対URLに修正。実機変更なし。
+
 ## 2026-10-19
 
 - ローカルのPrivate archive、SBAT6作業ディレクトリ、`sbat6-tools` と `sbat6-usb-nic` の公開履歴を調査して初版を作成。

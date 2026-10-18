@@ -37,6 +37,7 @@ SoftBank Air Terminal 6（SBAT6 / SBAT6A相当）2台で、EasyMesh Controller/A
 - [失敗と復旧](docs/13-failures.md) · [復旧手順](docs/14-recovery.md) · [再現ガイド](docs/15-reproduction-guide.md) · [現在の確認状況](docs/16-current-status.md)
 - **掲示板向け中心章:** [root取得後からEasyMesh親子化まで](docs/21-from-root-to-easymesh.md) · [5ch投稿866〜868への回答](docs/22-5ch-866-868-answer.md)
 - [KnOS設定復元](docs/17-knos-configuration-reset.md) · [SSH/firewall永続化](docs/18-ssh-firewall-persistence.md) · [root password](docs/19-root-password-and-authentication.md) · [SSH切断診断](docs/20-ssh-loss-troubleshooting.md)
+- [EasyMesh設定値の比較表](configs/easymesh-values-matrix.md) · [安全な読み取り専用診断スクリプト](scripts/sbat6-diagnose.sh)
 - [時系列](docs/timeline.md) · [技術的知見](docs/technical-findings.md) · [未解決事項](docs/unresolved-issues.md) · [公開前監査](docs/23-publication-audit.md)
 - [公開証跡索引](evidence/INDEX.md) · [出典対応表](SOURCES.md) · [変更履歴](HISTORY.md)
 
