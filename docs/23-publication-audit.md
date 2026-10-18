@@ -76,8 +76,13 @@ Private `SBAT6A-Offline-Archive` remote HEAD `2725c5487a818e4b655bb868326f973c4d
 - 実行例から歴史IPを除去し、現在値を手動設定する空のshell変数を利用。historical値は監査・性能結果の説明文だけに残した。
 - 診断parserのrole形式、複数distance、mediumラベル限定、BH status/type、MLO band/ref count、無関係な6G、numeric noise、空応答をfixtureで確認。hostname等を出力せず、listener不明を停止と断定しない。iptables INPUT rule数は`-A INPUT`行のみ集計。
 - POSIX shとBusyBox ashで30件のshell code fenceと診断script構文/fixture、SSH stdin quoting mock test、10 unittest、link/artifact/read-only checksが成功。GitHub ActionsにはBusyBox検査を追加。
-- 残る必須未解決: Controller writerの実機readback、KnOS flag positive writer、適用可能な完全profile、MLO長時間/全firmware検証、EHT320。これはv1.0で過大主張しないための明示的境界。
+- 残る未解決: Controller writerの実機readback、KnOS flag positive writer、適用可能な完全profile、MLO長時間/全firmware検証、EHT320。これはv1.0で過大主張しないための明示的境界。
 
 ### v1.0判定
 
-公開記録は、再現可能な観測、静的な構造解析、実機設定変更の未検証箇所、証拠の日付不整合を分離して提示できる状態になった。全端末向けの一括手順やController設定の実機検証は未達であり、ユーザー定義のv1.0では未解決として許容された範囲である。GitHub Actionsの実行結果と公開tagは、push後に本章へ追記する。
+公開記録は、再現可能な観測、静的な構造解析、実機設定変更の未検証箇所、証拠の日付不整合を分離して提示できる状態になった。全端末向けの一括手順やController設定の実機検証は未達であり、ユーザー定義のv1.0では未解決として許容された範囲である。
+
+- **v1.0文書監査判定: PASS。** この判定は証拠・適用条件・再現範囲・未検証事項が明確な公開資料としての完成判定で、全SBAT6の設定変更成功を意味しない。
+- `main` commit `b5860ccec9ae657c976f8f81eeb0f66a386f2527` の [GitHub Actions run 39172892855](https://github.com/Karin-Laboratory/sbat6-easymesh/actions/runs/39172892855) は成功。POSIX/BusyBox shell、文書/fixture tests、read-only契約、履歴を含むGitleaks scanが完了した。
+- GitHub ActionsからNode.js/runner移行の警告が出たが、jobは成功し、今回の監査失敗ではない。
+- v1.0.0のGit tag/releaseは、監査記録を含む最終main commitに付与する。
