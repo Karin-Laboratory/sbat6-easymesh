@@ -11,7 +11,7 @@
 | `MapMode` | ベンダーのMulti-AP動作モード | 既存スクリプトが両機の値1を前提にする。モードの全意味は静的コード資料に依存 |
 | `map_root`, `map_agent` | driver/wapp側のEasyMesh role表現 | ログ/解析語として確認。daemon上の状態との完全な対応表は未公開 |
 
-T6A Controllerの `DeviceRole=1`、T6B Agentの `DeviceRole=2`、両方の `MapMode=1` は、2026-08-23の後続スクリプトによる前提条件として確認できる。これを成功時の初期投入コマンド全体だとは扱わない。
+T6A Controllerの A/T6Aの保存設定 (`mlo-recon/A/etc/map/mapd_cfg`) は `DeviceRole=1`, `MapMode=1`、B/T6B (`mlo-recon/B/etc/map/mapd_cfg`) は `DeviceRole=2`, `MapMode=1`。vendor script自身の診断文字列はDeviceRole 0=Auto, 1=Controller, 2=Agentと明記する。2026-08-23のMLO後続スクリプトも同値をassertする。これらはスナップショット時点の値で、成功時の初期投入コマンド全体ではない。
 
 ## 成功判定
 
