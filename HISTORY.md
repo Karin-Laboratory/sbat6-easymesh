@@ -16,3 +16,14 @@
 - 31 tracked filesを再監査。秘密鍵/token/PSK形式/MAC/IMEIのpattern scanは0件、binary/non-text 0件、Markdown内部リンク切れ0件。
 - `git diff --check` 成功。実機には接続・変更していない。
 - 公開後再監査で、EHT320 rollback資料が160+160を既知成功ベースラインと記している点を反映。実験者記録上の成功と未取得のオンエア詳細を区別。
+
+
+## 全面事実監査・加筆（2026-10-19）
+
+- Qiita本人公開記事を照合し、旧版にあったMLO成功未確認の誤った含意を訂正。5+6 GHz 2-link成立、RSNE mismatch修正、通常reboot後の自動復帰、342秒以上の観測、Ethernet端末iperf3 0.91〜0.94 Gbpsを証拠区分付きで追加。
+- 6 GHz単独BHのchannel/width、APCLI対応、role/MapMode、優先値、EasyMesh診断CLIとiperf3条件を追記。T6本体endpointとEthernet端末endpointの性能差を明示。
+- `.223`成功記事と`.247`別snapshotの時刻を照合。DHCP変遷の連続証拠がないため、同一試験内のIP変更とは断定しない。`.1`、`.13`も別時期/管理用途に分離。
+- Private archive remote HEAD `2725c5487a818e4b655bb868326f973c4d9e14ba`のKnOS/SSH報告とBank A/B選定rootfsを再調査。firewall reload経路、Dropbear管理、`knos_config`のpasswd/shadow参照先・Dropbear enable切替、procd起動完了条件を要約。10/18個別発火は未確定と明記。
+- `/data` seed/one-shot restore/cron/watchdogの過去T6A鍵SSH復旧、待ち時間、2回連続復帰を別時期の実績として記載。root passwordは未検証。
+- 5ch回答章、root取得後の実践ガイド、KnOS/SSH各章、監査レポートを追加。RCE、vendor原本、生ログ、認証情報、復旧scriptは非公開。
+- worktreeとGit全履歴のsecret-pattern scan、Markdownリンク/anchor検査、`git diff --check`を実施。個別監査記録は[公開前監査](docs/23-publication-audit.md)。実機変更なし。

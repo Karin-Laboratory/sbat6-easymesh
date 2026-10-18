@@ -13,6 +13,9 @@
 
 A/T6Aの保存設定 (`mlo-recon/A/etc/map/mapd_cfg`) は `DeviceRole=1`, `MapMode=1`、B/T6B (`mlo-recon/B/etc/map/mapd_cfg`) は `DeviceRole=2`, `MapMode=1`。vendor script自身の診断文字列はDeviceRole 0=Auto, 1=Controller, 2=Agentと明記する。2026-08-23のMLO後続スクリプトも同値をassertする。これらはスナップショット時点の値で、成功時の初期投入コマンド全体ではない。
 
+
+2026-08-23本人公開記事では、`mapd_cli /tmp/mapd_ctrl getrole`、`agent_list`、`dump_topology`、`dump_topology_v1`、`bh_info`、`bh_conn_status`、`bh_conn_type`、`get_bh_ap`、`get_fh_ap`が診断に使われ、Controller distance 0 / Agent distance 1とEasyMesh R3互換の親子認識が報告されている。完全なIEEE 1905.1 packet traceや適合試験資料があるという意味ではない。
+
 ## 成功判定
 
 実験時に `mapd_cli` から親子距離を確認し、Controller側Distance 0、Agent側Distance 1が記録された。IEEE 1905.1 discoveryやR3互換の全イベント・TLVのパケットキャプチャは公開証跡に含まれておらず、プロトコル内部の完全なonboarding過程は未再構成。

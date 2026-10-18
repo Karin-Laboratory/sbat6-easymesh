@@ -1,19 +1,17 @@
-# 13. 失敗・誤認・原因の切り分け
+# 13. 失敗・現象と修正
 
-以下は保存された作業痕跡から作れる範囲の順序である。詳細な全試行の時刻や完全な失敗ログは存在せず、イベント列の細部を推測で埋めていない。
+| 順 | 現象 | 原因/判定 | 対応・結果 | 証拠状態 |
+|---|---|---|---|---|
+| 1 | 初期SSH管理経路がない/不安定 | EasyMesh状態とは独立した管理経路の問題 | 管理手段を整えてから構成 | 保存記録。初期侵入手順は非掲載 |
+| 2 | EasyMesh discovery/onboardingを確認できない | Ethernetで物理/IP経路とwireless BHを分ける必要 | 有線でonboardingしtopology確認後に無線へ移行 | 本人公開記事 |
+| 3 | Ethernet抜線後、旧管理IPへの到達性が変わる | `MapMode=1`のDHCP/bridge変更でAgentの管理IPv4が移る場合がある。特定のDHCP競合発生は公開根拠で確認できていない | APCLI carrier/BH topology/L2 endpointとDHCP/bridgeを個別確認 | 管理面変化と6G BH成功を別判定 |
+| 4 | MLO適用後約100ms切断、RSNE mismatch | 5G WPA2系/6G SAE+PMF required不整合。runtime provisioningがprofileを戻す | BSS profile生成元を修正、SAE/PMF required統一 | 本人公開記事 |
+| 5 | 起動後のMLO/管理復帰に時間 | DHCP/Mesh参加が起動完了直後ではない | 約170秒DHCP、173秒Mesh再参加、342秒以上MLO観測を報告 | 本人公開記事 |
+| 6 | T6A SSHが接続中に切れる（10月掲示板状況） | firewall reload、daemon、IP、設定変更、reboot候補を分離。特定caller未確定 | read-only差分比較が必要 | 保存rootfs静的解析。個別因果は未確定 |
+| 7 | B snapshotで稼働APCLIが変化 | role/mode/hash保持とactive bandは別。時刻/文脈も不確定 | 元の6GHz BH成功の失敗とは断定しない | 保存snapshot |
+| 8 | 設定hashが同じでも実効挙動が違う | MLO時はEasyMesh runtime provisioningがBSS profileを戻し、BSS生成元の修正が必要だったと報告 | 生成元を揃え、SAE/PMF required化後に4-way handshake成功を報告 | 本人公開記事 |
+| 9 | reboot後設定/firmware自動復元の疑い | `/data/sysupgrade.tgz`のoverlay復元は過去T6Aで確認。一方、EasyMesh/今回SSH断に対するfirmware bank自動復元の発火証拠は未取得 | overlay復元とbank切替を分離して確認 | 未解決 |
+| 10 | DHCP競合やbridge再構成が疑われる | `MapMode=1`のOEM処理にDHCP/bridge変更が存在。個別の競合パケットや失敗したbridge状態は公開可能資料で未確認 | IP lease、`br-lan` member、Mesh topologyを個別採取 | 静的解析/未検証 |
+| 11 | EHT320を成功扱いできない | 保存案は未実行と明記 | 実験案として分離 | 静的資料確認 |
 
-| 順 | 現象/試行 | 観測・判断 | 対応と状態 |
-|---:|---|---|---|
-| 1 | B号機の管理SSHが使えない | BのWeb UI経由コマンド実行は確認されたが、初期はSSH listener経路が整っていなかった | T6B専用の診断・Dropbear起動・限定firewall作業へ進んだ。試行中の管理経路不安定はEasyMesh失敗ではない |
-| 2 | BからのHTTP取得を誤認するリスク | raspi2側HTTP 200だけでは、接続元がBだと証明できない | source IPでB由来を確認する診断方針に訂正 |
-| 3 | Agent側のSSH/管理IPを失う | B向けMLO/daemon再起動・network状態変化の間、遠隔管理が不安定になった形跡が残る。IPと機器対応は時期で変化 | root経路の事前確認、限定管理firewall、snapshot/rollbackスクリプトを追加。Mesh topology自体は別途判定が必要 |
-| 4 | MLO/RSNE変更後のmapd/wapp動作が不明 | `mlo-leave-*` capture群にstrace・logreadが複数段階で採取されている | daemonを含むteardown/設定再生成の調査へ移った。ログの全結論は未公開 |
-| 5 | 再起動後のMLO interface状態が変わる | Bのpre/post snapshotで `br-lan` 管理IP・`DeviceRole=2`・`MapMode=1` と対象設定hashは同じ。一方、稼働中STA IFはpreで`apclix0`、postで`apclii0`に変わった | role/mode設定の保持と特定band linkの保持は別と判断。別MLO-contextの後続観測であり、元の6 GHz成功試験の失敗とは断定しない |
-| 6 | 起動後に期待設定が変わり得る | mapd設定のUCI→生成ファイル変換と複数復旧層の存在を確認 | 再起動前の一時状態だけで永続成功としない方針へ変更 |
-| 7 | EHT320候補 | 安全ガード付き試験案は存在するが、READMEで未転送・未実行 | EHT320を成功扱いしない。160+160 baselineへrollbackする設計案のみ |
-
-### DHCP競合・firmware restore・失敗原因の確定範囲
-
-DHCP競合や管理IP消失の個別原因・順序は、該当する一次ログ一式を取得できず再監査できなかった。`br-lan` はBの再起動前後snapshotに同じ管理IPで現れ、少なくともこの試行ではbridgeが消えたとはいえない。自動firmware restoreを起こした証拠も見つからず、設定hashが同じだった一件だけで一般的なfirmware復元挙動を否定も肯定もできない。
-
-**判断の訂正:** SSH不能、ping不能、HTTP取得不能をMesh参加失敗と同一視しない。個別にcontrol-plane topology、BH radio state、management reachability、client forwardingを観測する。
+通信断のみでEasyMesh脱落と決めず、`mapd_cli` topology/BHを別に見る。

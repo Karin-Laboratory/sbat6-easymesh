@@ -1,9 +1,9 @@
-# 12. 設定永続化と起動時の上書き
+# 12. 設定・SSH・Meshの永続性
 
-設定変更後に再起動で期待値が消える/別値へ戻る可能性が、復旧スクリプトや後日のPrivate archiveで問題として扱われている。静的解析で `/etc/config/mapd` をvendor Lua (`uci2map.lua`) がmapd向け設定へ変換することが確認でき、無線UCIとKNOS backup source等の複数層を扱う記録もある。
+別々に検証する対象は (1) UCI/KnOS設定、(2) runtime firewall table、(3) Dropbear/OpenSSH lifecycle、(4) EasyMesh role/profile、(5) DHCP/管理IP、(6) MLO link association。ある層の保存hash一致は他層の動作保証ではない。
 
-保存された `EasyMesh_openwrt.sh` の静的解析では、profileの `MapMode` と `LastMapMode` を読み、条件によって `/etc/map/mapd_cfg` をdefaultから再生成してuser設定を反映する。さらに `DeviceRole`, `DhcpCtl`, `ThirdPartyConnection`, `MapMode` を条件にDHCPを止めたり有効化したりし、場合によってnetwork再読込やbridge/switch構築へ進むコードがある。これはネットワーク再構成の実装根拠だが、特定のIP消失・DHCP競合がこの分岐で起きたという実機因果までは確定しない。単一設定ファイルを直接編集して再起動する方法は安全な再現手順ではない。
+2026-08公開記事はEasyMesh MLO後の通常rebootで約170秒後DHCP、約173秒後Mesh再参加、342秒以上のMLO観測を報告する。これはMesh/MLOの報告であり、SSH・iptables永続化を示さない。
 
-後続のMLO/EHT320試験では、事前snapshot、commit後のreadback、rollback/failsafeを設計している。EHT320のfailsafeは案の段階であり、実機の永続性証明には使えない。
+別の2026-09 T6A復旧記録では`/data/sbat6-ssh-overlay.tgz`をseedとし、`/data/sysupgrade.tgz`経由のoverlay復元、毎分seed再配置、20秒周期watchdogで鍵SSHを復帰させた。再起動2回後に接続を確認した一方、起動時の復元後に通常3〜4分待った。これは特定の過去T6A復旧手法で、8月の2台Mesh構成・root password永続性の証拠ではない。
 
-再現時は、変更前後に関係する全UCI値と生成ファイルのhash、起動symlink、起動後daemonの実行結果を保存し、再起動後にも再取得する。秘密を含むsnapshotは公開しない。
+B再起動snapshotはrole/modeと一部設定hash保持を示したが、採取時UPのAPCLIは入れ替わった。ファイル名・host mtime・端末epochがずれるため実験時系列は限定的。

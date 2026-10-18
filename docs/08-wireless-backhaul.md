@@ -1,21 +1,17 @@
 # 8. 6 GHz無線バックホール
 
-## 実機確認された移行
+## 成功時の観測（2026-08-23本人公開記事）
 
-有線で親子関係を確認した後、AgentのBHが無線で稼働する状態にし、Ethernetを抜いても親子接続が残ることを確認した。実験の最終記録は6 GHz BHを明示しており、T6B Ethernetから上位LANへ到達するL2延長も確認された。
+Ethernetでonboardingした後、Controller/Agent topologyとBH状態を確かめてからEthernetを外し、6 GHz無線BHを確認した。報告値はController distance 0、Agent distance 1、Backhaul Medium Type 6G、Agent `bh_conn_status=1`、`bh_conn_type=Type 4`。
 
-**保存データから確認:** MediaTek側の代表IF名は親側6 GHz AP `rax2`、Agent側STA `apclix0`。5 GHz側候補は `rai2`/`apclii0`。APCLIが存在することだけでは接続状態の証明にならない。
+APCLI対応は`apcli0`=2.4 GHz、`apclii0`=5 GHz、`apclix0`=6 GHz。ケーブル切断後、`apclix0` carrier=1/LOWER_UPでbytes counterが増え、他APCLIはdownだった。記事ではchannel 21、6055 MHz、160 MHz、4addr onを観測値として記録する。
 
-## 成功条件として記録できる範囲
+AgentのEthernet端末から上位LAN側へのL2延長も確認したと記事は報告する。ここでの成功判定は、Mesh topologyだけでなく、無線BH状態・ケーブル抜線・Agent配下端末間のL2通信を組み合わせる。
 
-- EasyMesh Controller/Agentのrole設定とTopologyが成立している。
-- 6 GHz BH profileを両機が共有している。認証値は公開しない。
-- 6 GHz radio/VIFが起動し、BH link stateと無線統計が動いている。
-- AgentのEthernet portは `br-lan` に属し、上位側と同一L2 domainとして転送される。
-- Ethernet切断後もMesh topologyとBHが残り、Agent配下クライアントの疎通が続く。
+## 優先順位とfallback
 
-プロファイルの実SSID、PSK、BSSID、実験時の最終チャンネル・チャネル幅は取得可能な公開資料で確定できなかった。2.4/5/6 GHzの「優先順位」や自動fallbackの確実な順序も不明。2.4/5 GHzを先に試した全試行列を作れる資料もないため、実測済みの6 GHz成立だけを記載した。
+Controller設定の記録値は6 GHz priority 1、5 GHz low/high priority 2、2.4 GHz priority 3、`AutoBHSwitching=1`。実際に6 GHz BHを確認したが、2.4/5/6 GHz全ての障害条件別fallback順、DFS/遮蔽時の長時間自動再接続は未確認。APCLIが存在するだけでBH成立と判定しない。
 
-## Ethernet切断後の再接続
+## 証拠範囲
 
-当時はEthernetを物理的に切断しても6 GHz BHが維持された。長時間・再起動をまたぐ自動再接続の統計、遮蔽/DFS等の条件でのfallback実測は未確認。
+ここに記した実測値はQiita本人公開記事の報告。原始的なradio captureを公開資料として独立再解析したものではない。秘密SSID/PSK/BSSIDを転載しない。

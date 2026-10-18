@@ -1,7 +1,27 @@
 # 7. Ethernetによる初期オンボーディング
 
-二台を有線でつないだ状態から開始したのは、EasyMesh制御面の認識と無線BHの確立を一度に切り分けるためだった。**実機確認済み:** 有線接続時に親子認識を進め、Controller Distance 0 / Agent Distance 1を観測したという実験記録が残る。
+有線接続から始めた理由は、IEEE 1905.1 discovery/onboardingと無線BH切替を分けて診断するため。2026-08-23本人記事では、ControllerからAgentがrole 02/distance 1で見えることを確認した後にEthernetを外している。
 
-しかし初期オンボーディング時の完全な設定スナップショット、端末上で実行した全コマンド、IEEE 1905.1全フレームログは今回取得できた公開可能資料にはない。よってこのページは設計意図と成功判定を記録し、コマンドを推測して埋めない。
+## 記事に記録された確認コマンド
 
-再現する場合は、まず既定のvendor bridge/DHCPを維持し、二台の異なる管理IPを確認する。IP競合やSSH不能をEasyMesh失敗と即断せず、別の管理端末から `mapd_cli` topologyとBH stateを確認してからネットワーク層を診断する。
+これらは記事で実際に使われたdiagnostic CLIで、firmware buildにより対応差があり得る。
+
+```sh
+mapd_cli /tmp/mapd_ctrl getrole
+mapd_cli /tmp/mapd_ctrl agent_list
+mapd_cli /tmp/mapd_ctrl dump_topology
+mapd_cli /tmp/mapd_ctrl dump_topology_v1
+mapd_cli /tmp/mapd_ctrl bh_info
+mapd_cli /tmp/mapd_ctrl bh_conn_status
+mapd_cli /tmp/mapd_ctrl bh_conn_type
+mapd_cli /tmp/mapd_ctrl get_bh_ap
+mapd_cli /tmp/mapd_ctrl get_fh_ap
+```
+
+同記事は`mapd_cli /tmp/mapd_ctrl onboarding 0`をEthernet onboarding機能として説明する。ただし、成功時はまず自動認識とtopologyを調べ、必要時だけCLI操作を追加したと記録しているため、このコマンドを常に実行した成功コマンドとは扱わない。
+
+## 判定
+
+Controller distance 0、Agent distance 1、DeviceRole 1/2を確認し、topologyにAgentが現れた時点で制御面の認識を確認する。次にBH mediumとstatus、APCLI、Agent配下Ethernet端末の通信を別段階で確認する。IPv4管理IPへpingできないだけでonboarding失敗とは決めない。
+
+完全な1905.1 packet trace、全成功時command transcript、初期全設定は公開可能資料として取得できていない。

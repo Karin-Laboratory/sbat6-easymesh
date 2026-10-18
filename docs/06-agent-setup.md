@@ -1,11 +1,13 @@
 # 6. Agent側（T6B）
 
-## 確認された役割
+## 実験時の役割と確認値
 
-**保存データから確認:** 2026-08-23の `mlo_apply_b.sh` は `mapd.mapd_cfg.DeviceRole=2` と `MapMode=1` をassertする。対象はB号機であり、同スクリプトは既存6 GHz BH profileを秘密値を表示せずに選び出そうとしている。
+2026-08-23本人公開記事のB/T6BはAgent。`DeviceRole=2`、`MapMode=1`、Controllerからdistance 1。`mlo_apply_b.sh`もrole/modeをassertする。成功記事でAgent BHは`bh_conn_status=1`、`bh_conn_type=Type 4`、Backhaul Medium Type 6G。
 
-MLO段階でT6Bには、`apclii0 apclix0` のSTA MLD設定（group ID 1、primary `apclix0`）とSAE/PMF-required関連設定を加える差分が準備された。これはMLOの実験設定であって、6 GHz単独EasyMesh BHの全設定を示すものではない。秘密鍵とSSIDは実例から省き、再利用可能な実値は公開しない。
+後続MLO用差分には`apclii0 apclix0`のSTA MLD（group ID 1、primary `apclix0`）とSAE/PMF-required設定がある。これはMLO段階の追加内容であり、単独6 GHz BHの完全な初期設定ではない。
 
-## 管理IP
+## DHCPと管理IP
 
-T6Bに関連して `192.168.3.247` と補助経路 `192.168.3.1` が記録群に現れるが、役割/時期/hostname/MACの変更もあり、IPだけで同一状態を表さない。本書は歴史的IPを設定例に再利用しない。管理IPが消えた事象は [失敗記録](13-failures.md) と [復旧](14-recovery.md) を参照。
+成功記事のT6B Agentは`192.168.3.223`。別のB再起動snapshotには`.247/24`が現れる。ファイル名日付、ホストmtime、端末epochが一致しないため、両者のDHCP変遷を連続記録で証明できてはいない。どちらも実験時点の別観測として扱い、固定値として再利用しない。`.1`は補助管理アドレス、後日のT6A単独STA管理`.13`は別モード/時期。
+
+`MapMode=1`のAgentでIPv4管理だけ失われる場合はDHCP/bridgeを確認し、EasyMesh topologyを独立して確認する。
